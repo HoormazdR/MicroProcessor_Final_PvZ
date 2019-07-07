@@ -1,3 +1,4 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.h
@@ -36,19 +37,47 @@
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __MAIN_H
+#define __MAIN_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f3xx_hal.h"
 
+/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
 
-/* Private define ------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
 
+/* USER CODE END ET */
+
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
+
+/* USER CODE END EC */
+
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
+
+/* USER CODE END EM */
+
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
+
+/* USER CODE BEGIN EFP */
+
+/* USER CODE END EFP */
+
+/* Private defines -----------------------------------------------------------*/
 #define DRDY_Pin GPIO_PIN_2
 #define DRDY_GPIO_Port GPIOE
 #define CS_I2C_SPI_Pin GPIO_PIN_3
@@ -83,14 +112,6 @@
 #define SSEG_i1_GPIO_Port GPIOA
 #define SSEG_i0_Pin GPIO_PIN_3
 #define SSEG_i0_GPIO_Port GPIOA
-#define SSEG_dot_Pin GPIO_PIN_4
-#define SSEG_dot_GPIO_Port GPIOA
-#define SPI1_SCK_Pin GPIO_PIN_5
-#define SPI1_SCK_GPIO_Port GPIOA
-#define SPI1_MISO_Pin GPIO_PIN_6
-#define SPI1_MISO_GPIO_Port GPIOA
-#define SPI1_MISOA7_Pin GPIO_PIN_7
-#define SPI1_MISOA7_GPIO_Port GPIOA
 #define LD4_Pin GPIO_PIN_8
 #define LD4_GPIO_Port GPIOE
 #define LD3_Pin GPIO_PIN_9
@@ -125,28 +146,43 @@
 #define MEMS_INT1_GPIO_Port GPIOE
 #define MEMS_INT2_Pin GPIO_PIN_1
 #define MEMS_INT2_GPIO_Port GPIOE
-
-/* ########################## Assert Selection ############################## */
-/**
-  * @brief Uncomment the line below to expanse the "assert_param" macro in the 
-  *        HAL drivers code
-  */
-/* #define USE_FULL_ASSERT    1U */
-
 /* USER CODE BEGIN Private defines */
+/*KEYPAD */
+
+/*outs */
+#define KEYPAD_COL1_PIN GPIO_PIN_4
+#define KEYPAD_COL1_PORT GPIOC
+
+#define KEYPAD_COL2_PIN GPIO_PIN_5
+#define KEYPAD_COL2_PORT GPIOC
+
+#define KEYPAD_COL3_PIN GPIO_PIN_6
+#define KEYPAD_COL3_PORT GPIOA
+
+#define KEYPAD_COL4_PIN GPIO_PIN_7
+#define KEYPAD_COL4_PORT GPIOA
+
+
+/*ins */
+#define KEYPAD_ROW1_PIN GPIO_PIN_8
+#define KEYPAD_ROW1_PORT GPIOA
+
+#define KEYPAD_ROW2_PIN GPIO_PIN_9
+#define KEYPAD_ROW2_PORT GPIOC
+
+
+#define KEYPAD_ROW3_PIN GPIO_PIN_9
+#define KEYPAD_ROW3_PORT GPIOA
+
+#define KEYPAD_ROW4_PIN GPIO_PIN_10
+#define KEYPAD_ROW4_PORT GPIOA
 
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
- extern "C" {
-#endif
-void _Error_Handler(char *, int);
-
-#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
-#ifdef __cplusplus
 }
 #endif
 
-#endif /* __MAIN_H__ */
+#endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
