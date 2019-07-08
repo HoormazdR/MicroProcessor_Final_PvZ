@@ -34,18 +34,37 @@
 #include "stm32f3xx_hal.h"
 #include "stm32f3xx.h"
 #include "stm32f3xx_it.h"
-#include "math.h"
 
 /* USER CODE BEGIN 0 */
 #include "ui.h"
 
-uint8_t pos = 0;
-
-void keypad_clicked(uint8_t row ,uint8_t col){
-//  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_8 * pow(2, row));
-}
 
 uint8_t col_num = 1;
+uint8_t pos = 0;
+
+extern uint16_t potanLightRand[3];
+extern ADC_HandleTypeDef hadc4;
+extern UART_HandleTypeDef huart3;
+
+
+
+void log(char str[]){
+	int size = strlen(str);
+	HAL_UART_Transmit(&huart3, str, size, 1000);
+}
+void log_adc(){
+	  char whatToTransfare[40];
+	  sprintf(&whatToTransfare, "Potan: %4d, Light: %4d, Rand: %4d \n"
+			  ,potanLightRand[0], potanLightRand[1], potanLightRand[2]);
+	  log(whatToTransfare);
+}
+
+void keypad_clicked(uint8_t row ,uint8_t col){
+	char a[30];
+	sprintf(&a, "Keypad Clicked Row: %d, Col: %d \n", row, col);
+	log(a);
+}
+
 void keypad_handler()
 {
   HAL_GPIO_WritePin(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN, col_num == 1);
@@ -89,6 +108,7 @@ void keypad_handler()
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern DMA_HandleTypeDef hdma_adc3;
 extern DMA_HandleTypeDef hdma_adc4;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
@@ -254,7 +274,7 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-
+  log_adc(); //TODO: if this interval change move this function to another timer that is about 1s
   show_7seg_oni(pos, 5);
   pos++;
   if (pos == 4)
@@ -302,6 +322,20 @@ void DMA2_Channel2_IRQHandler(void)
   /* USER CODE BEGIN DMA2_Channel2_IRQn 1 */
 
   /* USER CODE END DMA2_Channel2_IRQn 1 */
+}
+
+/**
+* @brief This function handles DMA2 channel5 global interrupt.
+*/
+void DMA2_Channel5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Channel5_IRQn 0 */
+
+  /* USER CODE END DMA2_Channel5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc3);
+  /* USER CODE BEGIN DMA2_Channel5_IRQn 1 */
+
+  /* USER CODE END DMA2_Channel5_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

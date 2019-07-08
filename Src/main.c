@@ -69,7 +69,7 @@ void SystemClock_Config(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+uint16_t potanLightRand[3];
 
 /* USER CODE END 0 */
 
@@ -109,14 +109,15 @@ int main(void)
   MX_TIM3_Init();
   MX_ADC4_Init();
   MX_USART3_UART_Init();
+  MX_ADC3_Init();
   /* USER CODE BEGIN 2 */
   LiquidCrystal(GPIOD, GPIO_PIN_8, GPIO_PIN_9, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12, GPIO_PIN_13, GPIO_PIN_14);
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
 
   test_ui();
-  uint16_t potanAndTemp[2];
-  HAL_ADC_Start_DMA(&hadc4, potanAndTemp, 2);
+
+  HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
   mainGame();
   /* USER CODE END 2 */
 
@@ -128,8 +129,7 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-	  char a[40]
-	  HAL_UART_Transmit(&huart3)
+
   }
   /* USER CODE END 3 */
 
