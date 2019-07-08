@@ -16,8 +16,8 @@
     <dbgIF>JTAG</dbgIF>
     <dbgDEV>ST-Link</dbgDEV>
     <mcuId>stm32f303vctx</mcuId>
-    <dbgIF>SWD</dbgIF>
     <dbgIF>JTAG</dbgIF>
+    <dbgIF>SWD</dbgIF>
     <dbgDEV>ST-LinkV2</dbgDEV>
   </board>
 </targetDefinitions>
