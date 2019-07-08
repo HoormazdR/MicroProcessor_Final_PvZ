@@ -85,12 +85,6 @@
 #define SSEG_i0_GPIO_Port GPIOA
 #define SSEG_dot_Pin GPIO_PIN_4
 #define SSEG_dot_GPIO_Port GPIOA
-#define SPI1_SCK_Pin GPIO_PIN_5
-#define SPI1_SCK_GPIO_Port GPIOA
-#define SPI1_MISO_Pin GPIO_PIN_6
-#define SPI1_MISO_GPIO_Port GPIOA
-#define SPI1_MISOA7_Pin GPIO_PIN_7
-#define SPI1_MISOA7_GPIO_Port GPIOA
 #define LD4_Pin GPIO_PIN_8
 #define LD4_GPIO_Port GPIOE
 #define LD3_Pin GPIO_PIN_9
@@ -134,6 +128,36 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
+
+/*KEYPAD */
+
+/*outs */
+#define KEYPAD_COL1_PIN GPIO_PIN_4
+#define KEYPAD_COL1_PORT GPIOC
+
+#define KEYPAD_COL2_PIN GPIO_PIN_5
+#define KEYPAD_COL2_PORT GPIOC
+
+#define KEYPAD_COL3_PIN GPIO_PIN_6
+#define KEYPAD_COL3_PORT GPIOA
+
+#define KEYPAD_COL4_PIN GPIO_PIN_7
+#define KEYPAD_COL4_PORT GPIOA
+
+
+/*ins */
+#define KEYPAD_ROW1_PIN GPIO_PIN_8
+#define KEYPAD_ROW1_PORT GPIOA
+
+#define KEYPAD_ROW2_PIN GPIO_PIN_9
+#define KEYPAD_ROW2_PORT GPIOC
+
+
+#define KEYPAD_ROW3_PIN GPIO_PIN_9
+#define KEYPAD_ROW3_PORT GPIOA
+
+#define KEYPAD_ROW4_PIN GPIO_PIN_10
+#define KEYPAD_ROW4_PORT GPIOA
 
 /* USER CODE END Private defines */
 

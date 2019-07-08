@@ -1,1 +1,3 @@
 /Debug/*
+/Debug/
+STM32F3DISCOVERY.xml

@@ -39,6 +39,52 @@
 #include "ui.h"
 
 uint8_t pos = 0;
+
+void keypad_clicked(uint8_t row ,uint8_t col){
+  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_8 * pow(2, row));
+}
+
+uint8_t col_num = 1;
+void keypad_handler()
+{
+  HAL_GPIO_WritePin(KEYPAD_COL1_PORT, KEYPAD_COL1_PIN, col_num == 1);
+  HAL_GPIO_WritePin(KEYPAD_COL2_PORT, KEYPAD_COL2_PIN, col_num == 2);
+  HAL_GPIO_WritePin(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN, col_num == 3);
+  HAL_GPIO_WritePin(KEYPAD_COL4_PORT, KEYPAD_COL4_PIN, col_num == 4);
+
+  if (HAL_GPIO_ReadPin(KEYPAD_ROW1_PORT, KEYPAD_ROW1_PIN))
+  {
+
+    keypad_clicked(1,col_num);
+    while (HAL_GPIO_ReadPin(KEYPAD_ROW1_PORT, KEYPAD_ROW1_PIN))
+      ;
+  }
+  else if (HAL_GPIO_ReadPin(KEYPAD_ROW2_PORT, KEYPAD_ROW2_PIN))
+  {
+    keypad_clicked(2,col_num);
+    while (HAL_GPIO_ReadPin(KEYPAD_ROW2_PORT, KEYPAD_ROW2_PIN))
+      ;
+  }
+  else if (HAL_GPIO_ReadPin(KEYPAD_ROW3_PORT, KEYPAD_ROW3_PIN))
+  {
+    keypad_clicked(3,col_num);
+    while (HAL_GPIO_ReadPin(KEYPAD_ROW3_PORT, KEYPAD_ROW3_PIN))
+      ;
+  }
+  else if (HAL_GPIO_ReadPin(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN))
+  {
+
+    keypad_clicked(4,col_num);
+    while (HAL_GPIO_ReadPin(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN))
+      ;
+  }
+
+  col_num++;
+  if(col_num == 5)
+	  col_num = 1;
+
+}
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -206,6 +252,8 @@ void TIM2_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
+
+
   show_7seg_oni(pos, 5);
   pos++;
   if (pos == 4)
@@ -223,7 +271,7 @@ void TIM3_IRQHandler(void)
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-
+  keypad_handler();
   /* USER CODE END TIM3_IRQn 1 */
 }
 
