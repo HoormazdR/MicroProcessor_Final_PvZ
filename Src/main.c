@@ -39,8 +39,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f3xx_hal.h"
+#include "adc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
+#include "usart.h"
 #include "usb.h"
 #include "gpio.h"
 
@@ -98,10 +101,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_USB_PCD_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_ADC4_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   LiquidCrystal(GPIOD, GPIO_PIN_8, GPIO_PIN_9, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12, GPIO_PIN_13, GPIO_PIN_14);
   HAL_TIM_Base_Start_IT(&htim2);
@@ -109,6 +115,8 @@ int main(void)
 
 //  lcd_inital();
   test_ui();
+  uint16_t potanAndTemp[2];
+  HAL_ADC_Start_DMA(&hadc4, potanAndTemp, 2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -119,7 +127,8 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+	  char a[40]
+	  HAL_UART_Transmit(&huart3)
   }
   /* USER CODE END 3 */
 
@@ -165,7 +174,10 @@ void SystemClock_Config(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB|RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB|RCC_PERIPHCLK_USART3
+                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_ADC34;
+  PeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+  PeriphClkInit.Adc34ClockSelection = RCC_ADC34PLLCLK_DIV1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_HSI;
   PeriphClkInit.USBClockSelection = RCC_USBCLKSOURCE_PLL;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
