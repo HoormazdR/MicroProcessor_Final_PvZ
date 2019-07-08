@@ -47,6 +47,7 @@
 /* USER CODE BEGIN Includes */
 #include "LiquidCrystal.h"
 #include "ui.h"
+#include "gameBase.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -107,8 +108,8 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
 
-//  lcd_inital();
   test_ui();
+  mainGame();
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -29,8 +29,6 @@ int shouldZombieMove(struct zombies z) {
 		return 0;
 }
 
-
-
 struct zombies initZombie(struct zombies z, enum ZombiesType type){
 	if(type == MOZTAFA)
 		z.power = CON_ZOMBIE_MOZTAFA_POWER;
@@ -46,4 +44,12 @@ struct zombies initZombie(struct zombies z, enum ZombiesType type){
 	z.type = type;
 
 	return z;
+}
+
+void mainGame () {
+	struct zombies zombieGame[10];
+
+	for(int i = 0; i < 5; i++) {
+		initZombie(zombieGame[i], ADELAPT);
+	}
 }

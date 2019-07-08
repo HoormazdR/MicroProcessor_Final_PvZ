@@ -51,4 +51,7 @@ enum ZombiesType {MOZTAFA, JAVADI, MAMAD, ADELAPT};
 extern int cursorX;
 extern int cursorY;
 
+//Methods
+void mainGame(void);
+
 #endif /* GAMEBASE_H_ */
