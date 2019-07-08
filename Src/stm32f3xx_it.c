@@ -34,6 +34,7 @@
 #include "stm32f3xx_hal.h"
 #include "stm32f3xx.h"
 #include "stm32f3xx_it.h"
+#include "math.h"
 
 /* USER CODE BEGIN 0 */
 #include "ui.h"
@@ -41,7 +42,7 @@
 uint8_t pos = 0;
 
 void keypad_clicked(uint8_t row ,uint8_t col){
-  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_8 * pow(2, row));
+//  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_8 * pow(2, row));
 }
 
 uint8_t col_num = 1;
