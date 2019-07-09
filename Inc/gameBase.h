@@ -48,6 +48,8 @@
 enum ZombiesType {MOZTAFA, JAVADI, MAMAD, ADELAPT};
 
 // Variables
+struct zombies;
+extern struct zombies zombieGame[10];
 extern int cursorX;
 extern int cursorY;
 

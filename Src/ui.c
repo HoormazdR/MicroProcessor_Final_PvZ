@@ -5,6 +5,8 @@
 #include "ui.h"
 #include "LiquidCrystal.h"
 
+#include "gameBase.h"
+
 // current lcd frame
 uint8_t lcd[4][20];
 
@@ -98,9 +100,11 @@ void lcd_inital() {
 }
 
 void test_ui() {
-	putstr(0, 0, "Amin");
+	showZombies();
+}
 
-	HAL_Delay(5000);
-
-	putstr(0, 0, "Hoormazd");
+void showZombies() {
+	for(int i = 0; i < 1; i++) {
+		putch(zombieGame[i].place.posx, zombieGame[i].place.posy, 'Z');
+	}
 }
