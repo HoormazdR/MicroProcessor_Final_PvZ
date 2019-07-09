@@ -147,7 +147,8 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+	  char a[40];
+	  HAL_UART_Transmit(&huart3);
   }
   /* USER CODE END 3 */
 

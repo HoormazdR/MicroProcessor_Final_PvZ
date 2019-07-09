@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "LiquidCrystal.h"
 
+#include "gameBase.h"
 //the main state of whole game
 extern enum State{
 	GAME,
@@ -130,6 +131,13 @@ void test_ui() {
 
 //	HAL_Delay(5000);
 	putstr(0, 0, "Hoormazd");
+	showZombies();
+}
+
+void showZombies() {
+	for(int i = 0; i < 1; i++) {
+		putch(zombieGame[i].place.posx, zombieGame[i].place.posy, 'Z');
+	}
 }
 
 void moveCursor(uint8_t x, uint8_t y){
