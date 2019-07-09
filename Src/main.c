@@ -70,7 +70,12 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN 0 */
 uint16_t potanLightRand[3];
-
+enum State{
+	GAME,
+	MENU,
+	ENTER_NAME
+};
+enum State state = ENTER_NAME;
 /* USER CODE END 0 */
 
 /**
@@ -110,15 +115,28 @@ int main(void)
   MX_ADC4_Init();
   MX_USART3_UART_Init();
   MX_ADC3_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   LiquidCrystal(GPIOD, GPIO_PIN_8, GPIO_PIN_9, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12, GPIO_PIN_13, GPIO_PIN_14);
+  begin(20,4);
+  lcd_inital();
+
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
 
-  test_ui();
+//  test_ui();
+
 
   HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
   mainGame();
+
+
+  //for testing the EnterName
+
+  ui_enterNameInit();
+
+  //----------------------
   /* USER CODE END 2 */
 
   /* Infinite loop */

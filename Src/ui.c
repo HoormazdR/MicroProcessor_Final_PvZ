@@ -5,11 +5,22 @@
 #include "ui.h"
 #include "LiquidCrystal.h"
 
+//the main state of whole game
+extern enum State{
+	GAME,
+	MENU,
+	ENTER_NAME
+};
+
+extern enum state;
+
 // current lcd frame
 uint8_t lcd[4][20];
 
 // last lcd frame
 uint8_t lcd_last[4][20];
+
+uint8_t cursorPos[2] = {0};
 
 //Based Function for lcd and stuff
 // lcd low level functions
@@ -42,22 +53,40 @@ void clearLCD() {
 }
 
 // this function refresh just changed parts of lcd
+uint8_t cursor_interval = 0;
 void refresh_lcd() {
 
 	int cux=0;
 	for (int y=0;y<4;y++) {
 		cux=-1;
-    for (int x=0;x<20;x++) {
-			if(lcd[y][x]!=lcd_last[y][x]) {
-				if(cux != x) {
-					cux=x;
-					setCursor(cux,y);
+		for (int x=0;x<20;x++) {
+				if(lcd[y][x]!=lcd_last[y][x]) {
+					if(cux != x) {
+						cux=x;
+						setCursor(cux,y);
+					}
+					write(lcd[y][x]);
+					cux++;
 				}
-				write(lcd[y][x]);
-				cux++;
-			}
+		}
+
+	}
+    //cursor controller
+    if(cursorPos[0] > -1 && cursorPos[1] > -1){
+    	if(!cursor_interval){
+    		setCursor(cursorPos[1], cursorPos[0]);
+			write('_');
+
+    	}
+    	else{
+    		setCursor(cursorPos[1], cursorPos[0]);
+    		write(lcd[cursorPos[0]][cursorPos[1]]);
+
+    	}
+    	cursor_interval = !cursor_interval;
     }
-  }
+
+
 
 	// save last frame after update
 	memcpy(lcd_last,lcd,80);
@@ -89,7 +118,7 @@ void lcd_inital() {
 	 for (int y=0;y<4;y++) {
 	      setCursor(0,y);
 	      for (int x=0;x<20;x++) {
-	  			lcd[y][x]=' ';
+			lcd[y][x]=' ';
 	        write(lcd[y][x]);
 	      }
 	    }
@@ -98,9 +127,24 @@ void lcd_inital() {
 }
 
 void test_ui() {
-	putstr(0, 0, "Amin");
 
-	HAL_Delay(5000);
-
+//	HAL_Delay(5000);
 	putstr(0, 0, "Hoormazd");
+}
+
+void moveCursor(uint8_t x, uint8_t y){
+	if(x<0||y<0||x>=20||y>=4)
+			return;
+	cursorPos[0] = y;
+	cursorPos[1] = x;
+}
+
+void ui_enterNameInit(){
+	clearLCD();
+	putstr(0,0,"Enter your name");
+	putstr(7,2,"****");
+	moveCursor(7, 2);
+}
+void ui_enterName_putchar(char c){
+	putch(cursorPos[1],cursorPos[0], c);
 }

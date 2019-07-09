@@ -37,13 +37,14 @@
 
 /* USER CODE BEGIN 0 */
 #include "ui.h"
+#include "keypad_controller.h"
 
 
 uint8_t col_num = 1;
 uint8_t pos = 0;
-
+uint8_t debunc_counter = 0;
+uint32_t keypad_lastClick_tick  = 1;
 extern uint16_t potanLightRand[3];
-extern ADC_HandleTypeDef hadc4;
 extern UART_HandleTypeDef huart3;
 
 
@@ -63,7 +64,9 @@ void keypad_clicked(uint8_t row ,uint8_t col){
 	char a[30];
 	sprintf(&a, "Keypad Clicked Row: %d, Col: %d \n", row, col);
 	log(a);
+//	keypadController(row, col);
 }
+
 
 void keypad_handler()
 {
@@ -72,37 +75,37 @@ void keypad_handler()
   HAL_GPIO_WritePin(KEYPAD_COL3_PORT, KEYPAD_COL3_PIN, col_num == 3);
   HAL_GPIO_WritePin(KEYPAD_COL4_PORT, KEYPAD_COL4_PIN, col_num == 4);
 
-  if (HAL_GPIO_ReadPin(KEYPAD_ROW1_PORT, KEYPAD_ROW1_PIN))
-  {
-
-    keypad_clicked(1,col_num);
-    while (HAL_GPIO_ReadPin(KEYPAD_ROW1_PORT, KEYPAD_ROW1_PIN))
-      ;
-  }
-  else if (HAL_GPIO_ReadPin(KEYPAD_ROW2_PORT, KEYPAD_ROW2_PIN))
-  {
-    keypad_clicked(2,col_num);
-    while (HAL_GPIO_ReadPin(KEYPAD_ROW2_PORT, KEYPAD_ROW2_PIN))
-      ;
-  }
-  else if (HAL_GPIO_ReadPin(KEYPAD_ROW3_PORT, KEYPAD_ROW3_PIN))
-  {
-    keypad_clicked(3,col_num);
-    while (HAL_GPIO_ReadPin(KEYPAD_ROW3_PORT, KEYPAD_ROW3_PIN))
-      ;
-  }
-  else if (HAL_GPIO_ReadPin(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN))
-  {
-
-    keypad_clicked(4,col_num);
-    while (HAL_GPIO_ReadPin(KEYPAD_ROW4_PORT, KEYPAD_ROW4_PIN))
-      ;
-  }
-
   col_num++;
   if(col_num == 5)
 	  col_num = 1;
 
+}
+
+uint16_t pre_GPIO_PIN = 0;
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
+	keypad_lastClick_tick = HAL_GetTick();
+	debunc_counter++;
+	if(debunc_counter < 5){
+		return;
+	}
+	debunc_counter = 0;
+	  if(GPIO_PIN_NUMBER == pre_GPIO_PIN){
+		  debunc_counter++;
+		  return;
+	  }
+	  pre_GPIO_PIN = GPIO_PIN_NUMBER;
+	  debunc_counter = 0;
+	char a[40];
+	sprintf(&a, "%d clicked tick: %d\n", GPIO_PIN_NUMBER, keypad_lastClick_tick);
+	log(a);
+	if(GPIO_PIN_NUMBER == 64)
+		keypad_clicked(1, col_num);
+	else if(GPIO_PIN_NUMBER == 512)
+		keypad_clicked(4, col_num);
+	else if(GPIO_PIN_NUMBER == 256)
+		keypad_clicked(2, col_num);
+	else if(GPIO_PIN_NUMBER == 1024)
+		keypad_clicked(3, col_num);
 }
 
 /* USER CODE END 0 */
@@ -112,6 +115,7 @@ extern DMA_HandleTypeDef hdma_adc3;
 extern DMA_HandleTypeDef hdma_adc4;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
 extern UART_HandleTypeDef huart3;
 
 /******************************************************************************/
@@ -265,6 +269,22 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+* @brief This function handles EXTI line[9:5] interrupts.
+*/
+void EXTI9_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+
+  /* USER CODE END EXTI9_5_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
+  /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+
+  /* USER CODE END EXTI9_5_IRQn 1 */
+}
+
+/**
 * @brief This function handles TIM2 global interrupt.
 */
 void TIM2_IRQHandler(void)
@@ -275,10 +295,8 @@ void TIM2_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
   log_adc(); //TODO: if this interval change move this function to another timer that is about 1s
-  show_7seg_oni(pos, 5);
-  pos++;
-  if (pos == 4)
-	 pos = 0;
+
+  HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_9);
   /* USER CODE END TIM2_IRQn 1 */
 }
 
@@ -288,12 +306,46 @@ void TIM2_IRQHandler(void)
 void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
-  refresh_lcd();
+
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
   keypad_handler();
+
+	show_7seg_oni(pos, 5);
+	pos++;
+	if (pos == 4)
+	 pos = 0;
+
+	uint32_t now = HAL_GetTick();
+	  if(now - keypad_lastClick_tick > 50)
+		  pre_GPIO_PIN = 0;
+  HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_8);
   /* USER CODE END TIM3_IRQn 1 */
+}
+
+/**
+* @brief This function handles TIM4 global interrupt.
+*/
+void TIM4_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM4_IRQn 0 */
+
+  /* USER CODE END TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim4);
+  /* USER CODE BEGIN TIM4_IRQn 1 */
+
+  /*keypad debunce handling*/
+  debunc_counter = 0;
+//  if(keypad_relesead)
+//	  pre_GPIO_PIN = 0;
+//  keypad_relesead = 1;
+  /*-----------------------*/
+
+
+  HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_12);
+  refresh_lcd();
+  /* USER CODE END TIM4_IRQn 1 */
 }
 
 /**
@@ -308,6 +360,24 @@ void USART3_IRQHandler(void)
   /* USER CODE BEGIN USART3_IRQn 1 */
 
   /* USER CODE END USART3_IRQn 1 */
+}
+
+/**
+* @brief This function handles EXTI line[15:10] interrupts.
+*/
+void EXTI15_10_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+//	if(debunc_counter < 5){
+//		  debunc_counter++;
+//		  return;
+//	  }
+//	  debunc_counter = 0;
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10);
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+
+  /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
 /**

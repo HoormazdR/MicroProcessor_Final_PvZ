@@ -57,6 +57,7 @@
 #define MEMS_INT3_GPIO_Port GPIOE
 #define MEMS_INT4_Pin GPIO_PIN_5
 #define MEMS_INT4_GPIO_Port GPIOE
+#define MEMS_INT4_EXTI_IRQn EXTI9_5_IRQn
 #define OSC32_IN_Pin GPIO_PIN_14
 #define OSC32_IN_GPIO_Port GPIOC
 #define OSC32_OUT_Pin GPIO_PIN_15
@@ -101,12 +102,24 @@
 #define LD8_GPIO_Port GPIOE
 #define LD6_Pin GPIO_PIN_15
 #define LD6_GPIO_Port GPIOE
+#define keypad_input_2nd_Pin GPIO_PIN_8
+#define keypad_input_2nd_GPIO_Port GPIOA
+#define keypad_input_2nd_EXTI_IRQn EXTI9_5_IRQn
+#define keypad_input_4end_Pin GPIO_PIN_9
+#define keypad_input_4end_GPIO_Port GPIOA
+#define keypad_input_4end_EXTI_IRQn EXTI9_5_IRQn
+#define keypad_input_1end_Pin GPIO_PIN_10
+#define keypad_input_1end_GPIO_Port GPIOA
+#define keypad_input_1end_EXTI_IRQn EXTI15_10_IRQn
 #define DM_Pin GPIO_PIN_11
 #define DM_GPIO_Port GPIOA
 #define DP_Pin GPIO_PIN_12
 #define DP_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
+#define keypad_input_3nd_Pin GPIO_PIN_6
+#define keypad_input_3nd_GPIO_Port GPIOF
+#define keypad_input_3nd_EXTI_IRQn EXTI9_5_IRQn
 #define SWCLK_Pin GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
@@ -135,8 +148,8 @@
 #define KEYPAD_COL1_PIN GPIO_PIN_4
 #define KEYPAD_COL1_PORT GPIOC
 
-#define KEYPAD_COL2_PIN GPIO_PIN_5
-#define KEYPAD_COL2_PORT GPIOC
+#define KEYPAD_COL2_PIN GPIO_PIN_4
+#define KEYPAD_COL2_PORT GPIOF
 
 #define KEYPAD_COL3_PIN GPIO_PIN_6
 #define KEYPAD_COL3_PORT GPIOA
