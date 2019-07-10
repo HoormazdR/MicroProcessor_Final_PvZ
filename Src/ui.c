@@ -37,8 +37,24 @@ uint8_t lcd[4][20];
 
 // last lcd frame
 uint8_t lcd_last[4][20];
-
 uint8_t cursorPos[2] = {0};
+
+//uart log
+
+extern uint16_t potanLightRand[3];
+extern UART_HandleTypeDef huart3;
+
+void log(char str[]){
+	int size = strlen(str);
+	HAL_UART_Transmit(&huart3, str, size, 1000);
+}
+void log_adc(){
+	  char whatToTransfare[40];
+	  sprintf(&whatToTransfare, "Potan: %4d, Light: %4d, Rand: %4d \n"
+			  ,potanLightRand[0], potanLightRand[1], potanLightRand[2]);
+	  log(whatToTransfare);
+}
+
 
 //Based Function for lcd and stuff
 // lcd low level functions

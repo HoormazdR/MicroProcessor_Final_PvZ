@@ -32,3 +32,5 @@ void refresh_ui(void);
 #define EQ_STATE(state,candidStare) !((state)^(candidStare))
 
 #endif
+void log(char str[]);
+void log_adc();

@@ -49,8 +49,6 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define DRDY_Pin GPIO_PIN_2
-#define DRDY_GPIO_Port GPIOE
 #define CS_I2C_SPI_Pin GPIO_PIN_3
 #define CS_I2C_SPI_GPIO_Port GPIOE
 #define MEMS_INT3_Pin GPIO_PIN_4
@@ -102,24 +100,12 @@
 #define LD8_GPIO_Port GPIOE
 #define LD6_Pin GPIO_PIN_15
 #define LD6_GPIO_Port GPIOE
-#define keypad_input_2nd_Pin GPIO_PIN_8
-#define keypad_input_2nd_GPIO_Port GPIOA
-#define keypad_input_2nd_EXTI_IRQn EXTI9_5_IRQn
-#define keypad_input_4end_Pin GPIO_PIN_9
-#define keypad_input_4end_GPIO_Port GPIOA
-#define keypad_input_4end_EXTI_IRQn EXTI9_5_IRQn
-#define keypad_input_1end_Pin GPIO_PIN_10
-#define keypad_input_1end_GPIO_Port GPIOA
-#define keypad_input_1end_EXTI_IRQn EXTI15_10_IRQn
 #define DM_Pin GPIO_PIN_11
 #define DM_GPIO_Port GPIOA
 #define DP_Pin GPIO_PIN_12
 #define DP_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
-#define keypad_input_3nd_Pin GPIO_PIN_6
-#define keypad_input_3nd_GPIO_Port GPIOF
-#define keypad_input_3nd_EXTI_IRQn EXTI9_5_IRQn
 #define SWCLK_Pin GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
@@ -128,10 +114,6 @@
 #define I2C1_SCL_GPIO_Port GPIOB
 #define I2C1_SDA_Pin GPIO_PIN_7
 #define I2C1_SDA_GPIO_Port GPIOB
-#define MEMS_INT1_Pin GPIO_PIN_0
-#define MEMS_INT1_GPIO_Port GPIOE
-#define MEMS_INT2_Pin GPIO_PIN_1
-#define MEMS_INT2_GPIO_Port GPIOE
 
 /* ########################## Assert Selection ############################## */
 /**
@@ -145,32 +127,32 @@
 /*KEYPAD */
 
 /*outs */
-#define KEYPAD_COL1_PIN GPIO_PIN_4
-#define KEYPAD_COL1_PORT GPIOC
+#define KEYPAD_COL1_PIN GPIO_PIN_6
+#define KEYPAD_COL1_PORT GPIOA
 
-#define KEYPAD_COL2_PIN GPIO_PIN_4
-#define KEYPAD_COL2_PORT GPIOF
+#define KEYPAD_COL2_PIN GPIO_PIN_7
+#define KEYPAD_COL2_PORT GPIOA
 
-#define KEYPAD_COL3_PIN GPIO_PIN_6
-#define KEYPAD_COL3_PORT GPIOA
+#define KEYPAD_COL3_PIN GPIO_PIN_4
+#define KEYPAD_COL3_PORT GPIOC
 
-#define KEYPAD_COL4_PIN GPIO_PIN_7
+#define KEYPAD_COL4_PIN GPIO_PIN_5
 #define KEYPAD_COL4_PORT GPIOA
 
 
 /*ins */
-#define KEYPAD_ROW1_PIN GPIO_PIN_8
-#define KEYPAD_ROW1_PORT GPIOA
+#define KEYPAD_ROW1_PIN GPIO_PIN_0
+#define KEYPAD_ROW1_PORT GPIOB
 
-#define KEYPAD_ROW2_PIN GPIO_PIN_9
-#define KEYPAD_ROW2_PORT GPIOC
+#define KEYPAD_ROW2_PIN GPIO_PIN_1
+#define KEYPAD_ROW2_PORT GPIOB
 
 
-#define KEYPAD_ROW3_PIN GPIO_PIN_9
-#define KEYPAD_ROW3_PORT GPIOA
+#define KEYPAD_ROW3_PIN GPIO_PIN_2
+#define KEYPAD_ROW3_PORT GPIOB
 
-#define KEYPAD_ROW4_PIN GPIO_PIN_10
-#define KEYPAD_ROW4_PORT GPIOA
+#define KEYPAD_ROW4_PIN GPIO_PIN_7
+#define KEYPAD_ROW4_PORT GPIOE
 
 /* USER CODE END Private defines */
 
