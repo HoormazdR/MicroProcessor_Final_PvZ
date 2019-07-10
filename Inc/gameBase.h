@@ -46,14 +46,53 @@
 #define STE_NORMAL_GAME    0x0700 + STE_TYPE_GAME
 
 enum ZombiesType {MOZTAFA, JAVADI, MAMAD, ADELAPT};
+enum PlantsType {Potato, Roze, Venus};
 
-// Variables
-struct zombies;
-extern struct zombies zombieGame[10];
+//Structs
+struct minsec{
+	int min;
+	int sec;
+};
+
+struct Point {
+	uint8_t posx;
+	uint8_t posy;
+};
+
+struct zombie {
+	struct Point place;
+	uint8_t health;
+	uint8_t power;
+	int TimeCounter;
+	enum ZombiesType type;
+};
+
+struct plant {
+	struct Point place;
+	uint8_t power;
+	enum PlantsType type;
+};
+
+struct actor {
+	struct zombie PvZzombies[10];
+	struct plant PvZPlants[10];
+};
+
+
+//Variables
+extern int health;
+extern int exist_plant;
+extern int exist_enemy;
+extern int GameState;
+extern int GameState_next;
+int time_sys;
+int time_game;
+extern struct actor actorOfTheGame;
 extern int cursorX;
 extern int cursorY;
 
 //Methods
 void mainGame(void);
+void update_time(void);
 
 #endif /* GAMEBASE_H_ */

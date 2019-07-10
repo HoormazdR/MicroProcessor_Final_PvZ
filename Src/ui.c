@@ -14,6 +14,23 @@ extern enum State{
 };
 
 extern enum state;
+int GameState = STE_NORMAL_GAME;
+
+unsigned char enemyType1[] = {
+		0x00, 0x0E, 0x0E, 0x1F, 0x04, 0x04, 0x0E, 0x0A
+};
+
+unsigned char enemyType1_frame2[] = {
+		0x00, 0x0E, 0x0E, 0x04, 0x1F, 0x04, 0x0E, 0x0A
+};
+
+unsigned char plantType2[] = {
+		0x1C, 0x1E, 0x10, 0x15, 0x1F, 0x10, 0x10, 0x1C
+};
+
+unsigned char plantType1[] = {
+		 0x15, 0x15, 0x0E, 0x04, 0x15, 0x1F, 0x0E, 0x04
+};
 
 // current lcd frame
 uint8_t lcd[4][20];
@@ -72,22 +89,6 @@ void refresh_lcd() {
 		}
 
 	}
-    //cursor controller
-    if(cursorPos[0] > -1 && cursorPos[1] > -1){
-    	if(!cursor_interval){
-    		setCursor(cursorPos[1], cursorPos[0]);
-			write('_');
-
-    	}
-    	else{
-    		setCursor(cursorPos[1], cursorPos[0]);
-    		write(lcd[cursorPos[0]][cursorPos[1]]);
-
-    	}
-    	cursor_interval = !cursor_interval;
-    }
-
-
 
 	// save last frame after update
 	memcpy(lcd_last,lcd,80);
@@ -115,6 +116,34 @@ void show_7seg_oni(int i, int a) {
 	HAL_GPIO_WritePin(SSEG_i3_GPIO_Port, SSEG_i3_Pin, i == 3);
 }
 
+int digit_7seg=0;
+void refresh_7seg() {
+
+	// game time to current ragham
+	int t = time_game;
+	int ragham;
+	if(digit_7seg==0)
+		ragham=health;
+	if(digit_7seg==1)
+		ragham=t/100%10;
+	if(digit_7seg==2)
+		ragham=t/10%10;
+	if(digit_7seg==3)
+		ragham=t%10;
+
+	HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 1);
+	if(digit_7seg==0)
+		HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 0);
+
+	// normal show 7seg
+	show_7seg_oni(digit_7seg, ragham);
+
+	digit_7seg++;
+	digit_7seg=digit_7seg%4;
+
+}
+
+
 void lcd_inital() {
 	 for (int y=0;y<4;y++) {
 	      setCursor(0,y);
@@ -127,16 +156,56 @@ void lcd_inital() {
 	 memcpy(lcd_last,lcd,80);
 }
 
-void test_ui() {
+//GameCodes
+/******************************************************************/
 
-//	HAL_Delay(5000);
-	putstr(0, 0, "Hoormazd");
-	showZombies();
+int frame = 0;
+int startFrame = 0;
+void screen_normal_game() {
+	if(frame==0) {
+		 createChar(0, enemyType1);
+		 createChar(1, enemyType1_frame2);
+		 createChar(2, plantType1);
+	}
+	char enemy = 0;
+	char enemy_f2 = 1;
+	char plant_Type1 = 2;
+
+	clearLCD();
+	for(int i = 0; i < exist_enemy; i++) {
+		if(frame%2 == 0)
+			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, enemy);
+		else if (frame%2 == 1)
+			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, enemy_f2);
+	}
+
+	for(int i = 0; i < exist_plant; i++) {
+		if(frame%2==0)
+			putch(actorOfTheGame.PvZPlants[i].place.posx, actorOfTheGame.PvZPlants[i].place.posy,  plant_Type1);
+		else if(frame%2==1)
+			putch(actorOfTheGame.PvZPlants[i].place.posx, actorOfTheGame.PvZPlants[i].place.posy,  plant_Type1);
+
+	}
+
+	if(frame > 100)
+		frame = 1;
+}
+
+void refresh_ui(void) {
+	int ok;
+	// normal game
+	if (GameState == STE_NORMAL_GAME) {
+		screen_normal_game();
+		ok=1;
+	}
+
+	frame++;
 }
 
 void showZombies() {
-	for(int i = 0; i < 1; i++) {
-		putch(zombieGame[i].place.posx, zombieGame[i].place.posy, 'Z');
+	clearLCD();
+	for(int i = 0; i < 10; i++) {
+		putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, 'Z');
 	}
 }
 
@@ -153,6 +222,7 @@ void ui_enterNameInit(){
 	putstr(7,2,"****");
 	moveCursor(7, 2);
 }
+
 void ui_enterName_putchar(char c){
 	putch(cursorPos[1],cursorPos[0], c);
 }
