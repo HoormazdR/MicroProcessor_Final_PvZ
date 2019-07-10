@@ -121,20 +121,20 @@ int main(void)
   begin(20,4);
   lcd_inital();
 
+  mainGame();
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_Base_Start_IT(&htim4);
 
-//  test_ui();
+  refresh_ui();
 
 
   HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
-  mainGame();
 
 
   //for testing the EnterName
 
-  ui_enterNameInit();
+//  ui_enterNameInit();
 
   //----------------------
   /* USER CODE END 2 */
@@ -147,8 +147,6 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-	  char a[40];
-	  HAL_UART_Transmit(&huart3);
   }
   /* USER CODE END 3 */
 

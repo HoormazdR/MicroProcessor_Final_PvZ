@@ -6,6 +6,8 @@ void show_7seg_oni(int i, int a);
 void lcd_inital(void);
 void refresh_lcd(void);
 void test_ui(void);
+void refresh_7seg(void);
+void refresh_ui(void);
 
 // Internal Macros
 #define HEX__(n) 0x##n##LU

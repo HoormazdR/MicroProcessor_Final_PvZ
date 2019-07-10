@@ -37,6 +37,7 @@
 
 /* USER CODE BEGIN 0 */
 #include "ui.h"
+#include "gameBase.h"
 #include "keypad_controller.h"
 
 
@@ -51,7 +52,7 @@ extern UART_HandleTypeDef huart3;
 
 void log(char str[]){
 	int size = strlen(str);
-	HAL_UART_Transmit(&huart3, str, size, 1000);
+	HAL_UART_Transmit(&huart3, str, size, 0);
 }
 void log_adc(){
 	  char whatToTransfare[40];
@@ -295,7 +296,7 @@ void TIM2_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
   log_adc(); //TODO: if this interval change move this function to another timer that is about 1s
-
+  update_time();
   HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_9);
   /* USER CODE END TIM2_IRQn 1 */
 }
@@ -310,17 +311,7 @@ void TIM3_IRQHandler(void)
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-  keypad_handler();
-
-	show_7seg_oni(pos, 5);
-	pos++;
-	if (pos == 4)
-	 pos = 0;
-
-	uint32_t now = HAL_GetTick();
-	  if(now - keypad_lastClick_tick > 50)
-		  pre_GPIO_PIN = 0;
-  HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_8);
+  refresh_7seg();
   /* USER CODE END TIM3_IRQn 1 */
 }
 
@@ -334,16 +325,6 @@ void TIM4_IRQHandler(void)
   /* USER CODE END TIM4_IRQn 0 */
   HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM4_IRQn 1 */
-
-  /*keypad debunce handling*/
-  debunc_counter = 0;
-//  if(keypad_relesead)
-//	  pre_GPIO_PIN = 0;
-//  keypad_relesead = 1;
-  /*-----------------------*/
-
-
-  HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_12);
   refresh_lcd();
   /* USER CODE END TIM4_IRQn 1 */
 }
