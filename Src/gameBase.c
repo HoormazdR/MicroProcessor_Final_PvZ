@@ -29,22 +29,17 @@ void deletePlant (struct plant array[], int position, int size) {
 }
 
 int checkZombieEat(int i) {
-	for(int j = 0; j < 10; j++) {
+	for(int j = 0; j < exist_plant; j++) {
 		if(actorOfTheGame.PvZPlants[j].place.posy == actorOfTheGame.PvZzombies[i].place.posy + 1) {
-			actorOfTheGame.PvZPlants[j].power -= actorOfTheGame.PvZzombies[i].power;
-			if(actorOfTheGame.PvZPlants[j].power <= 0)
-				deletePlant(actorOfTheGame.PvZPlants, j, exist_plant);
-			//TODO: Add zombie deletetion
+
 			return 1;
-		}
-		return 0;
 	}
 }
 
 //TODO: Need To Change
 void updateZomiesMove() {
-	for(int i = 0; i < 10; i++) {
-		if(!checkZombieEat(i)) {
+	for(int i = 0; i < exist_enemy; i++) {
+		if(checkZombieEat(i)) {
 			actorOfTheGame.PvZzombies[i].TimeCounter = actorOfTheGame.PvZzombies[i].TimeCounter - 1000;
 			if(actorOfTheGame.PvZzombies[i].TimeCounter <= 0)
 			{
@@ -58,6 +53,7 @@ void updateZomiesMove() {
 		}
 
 	}
+
 	refresh_ui();
 }
 
@@ -68,7 +64,9 @@ void timer_addation () {
 
 void update_time() {
 	timer_addation();
-	updateZomiesMove();
+
+	if(GameState == STE_NORMAL_GAME)
+		updateZomiesMove();
 }
 
 int shouldZombieMove(struct zombie z) {
@@ -118,6 +116,6 @@ void mainGame () {
 	actorOfTheGame.PvZPlants[0] = initPLant(actorOfTheGame.PvZPlants[0], 3, 2, Venus);
 	exist_enemy = 5;
 	for(int i = 0; i < exist_enemy; i++) {
-		actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], i, 0, ADELAPT);
+		actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], i, 0, MOZTAFA);
 	}
 }
