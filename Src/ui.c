@@ -49,19 +49,7 @@ uint8_t preCursorPos[2] = {0};
 extern uint16_t potanLightRand[3];
 extern UART_HandleTypeDef huart3;
 
-//UART
 
-#ifdef __GNUC__
-	#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif
-
-PUTCHAR_PROTOTYPE
-{
-	HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 1000); // change &uart1 accordingly
-	return ch;
-}
 
 
 void log(char str[]){
@@ -284,6 +272,14 @@ void ui_move_cursor_up_down(uint8_t upOrDown){
 	}
 	else{
 		moveCursor(cursorPos[0], cursorPos[1]-1);
+	}
+}
+void ui_move_cursor_left_right(uint8_t leftOrRight){
+	if(leftOrRight){
+		moveCursor(cursorPos[0]+1, cursorPos[1]);
+	}
+	else{
+		moveCursor(cursorPos[0]-1, cursorPos[1]);
 	}
 }
 

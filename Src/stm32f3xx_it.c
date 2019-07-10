@@ -41,8 +41,6 @@
 #include "keypad_controller.h"
 
 
-
-extern uint16_t potanLightRand[3];
 extern UART_HandleTypeDef huart3;
 
 
@@ -305,6 +303,9 @@ void TIM4_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM4_IRQn 1 */
   refresh_lcd();
+
+
+  potan_controller();
   /* USER CODE END TIM4_IRQn 1 */
 }
 

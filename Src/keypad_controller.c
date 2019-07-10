@@ -18,7 +18,8 @@ uint8_t debunc_counter = 0;
 uint8_t pos = 0;
 uint32_t keypad_lastClick_tick  = 1;
 uint16_t pre_GPIO_PIN = 0;
-
+uint16_t pre_potan = 0;
+extern uint16_t potanLightRand[3];
 
 
 void keypadController(uint8_t row, uint8_t col){
@@ -53,10 +54,10 @@ void keypad_handler()
   HAL_GPIO_WritePin(KEYPAD_COL4_PORT, KEYPAD_COL4_PIN, col_num == 4);
 
   uint32_t diff = HAL_GetTick() - keypad_lastClick_tick;
-  printf("%ld \n", diff);
   if( diff > 30){
 	  pre_GPIO_PIN = 0;
   }
+
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
@@ -99,9 +100,27 @@ void mobileKeypad(uint8_t row, uint8_t col){
 }
 void gameKeypad(uint8_t row, uint8_t col){
 	if( row == 1 && col == 2){
-		ui_move_cursor_up_down(1);
+		ui_move_cursor_up_down(0);
 	}
 	else if( row == 2 && col == 2){
-			ui_move_cursor_up_down(0);
+			ui_move_cursor_up_down(1);
 		}
+}
+
+void potan_controller(){
+	uint16_t potan = potanLightRand[0];
+	char a[30];
+	sprintf(&a,"potan: %d", potan);
+	log(a);
+	uint8_t diff = 20;
+	if(potan - pre_potan > diff){
+		log("\nleft\n");
+		ui_move_cursor_left_right(1);
+	}
+	else if(pre_potan - potan > diff){
+		log("\nright\n");
+		ui_move_cursor_left_right(0);
+	}
+	pre_potan = potan;
+
 }

@@ -34,3 +34,4 @@ void refresh_ui(void);
 #endif
 void log(char str[]);
 void log_adc();
+void ui_move_cursor_up_down(uint8_t upOrDown);
