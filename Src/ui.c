@@ -7,6 +7,8 @@
 
 #include "gameBase.h"
 //the main state of whole game
+
+
 extern enum State{
 	GAME,
 	MENU,
@@ -43,6 +45,21 @@ uint8_t cursorPos[2] = {0};
 
 extern uint16_t potanLightRand[3];
 extern UART_HandleTypeDef huart3;
+
+//UART
+
+#ifdef __GNUC__
+	#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+	HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 1000); // change &uart1 accordingly
+	return ch;
+}
+
 
 void log(char str[]){
 	int size = strlen(str);
