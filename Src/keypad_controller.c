@@ -9,30 +9,35 @@ extern enum State{
 };
 
 extern enum State state;
-
-void keypadController(uint8_t row, uint8_t col){
-	if(state == ENTER_NAME){
-		if(row > 1)
-			mobileKeypad(col - 1, row - 2);
-	}
-}
-
 char selectedChar = 'a';
 uint8_t clickTimes = 0;
 uint8_t pre_row = 0;
 uint8_t pre_col = 0;
 uint8_t col_num = 1;
 uint8_t debunc_counter = 0;
-
 uint8_t pos = 0;
 uint32_t keypad_lastClick_tick  = 1;
-
 uint16_t pre_GPIO_PIN = 0;
+
+
+
+void keypadController(uint8_t row, uint8_t col){
+	state = GAME;
+	if(state == ENTER_NAME){
+		if(row > 1)
+			mobileKeypad(col - 1, row - 2);
+	}
+	else if(state == GAME){
+		gameKeypad(row, col);
+	}
+}
+
+
 void keypad_clicked(uint8_t row ,uint8_t col){
 	char a[30];
 	sprintf(&a, "Keypad Clicked Row: %d, Col: %d \n", row, col);
 	log(a);
-//	keypadController(row, col);
+	keypadController(row, col);
 }
 
 void keypad_handler()
@@ -91,4 +96,12 @@ void mobileKeypad(uint8_t row, uint8_t col){
 		clickTimes = 0;
 		selectedChar -= 3;
 	}
+}
+void gameKeypad(uint8_t row, uint8_t col){
+	if( row == 1 && col == 2){
+		ui_move_cursor_up_down(1);
+	}
+	else if( row == 2 && col == 2){
+			ui_move_cursor_up_down(0);
+		}
 }

@@ -40,6 +40,9 @@ uint8_t lcd[4][20];
 // last lcd frame
 uint8_t lcd_last[4][20];
 uint8_t cursorPos[2] = {0};
+uint8_t cursor_blink_flg = 0;
+uint8_t cursor_changed = 0;
+uint8_t preCursorPos[2] = {0};
 
 //uart log
 
@@ -104,7 +107,7 @@ void clearLCD() {
 }
 
 // this function refresh just changed parts of lcd
-uint8_t cursor_interval = 0;
+
 void refresh_lcd() {
 
 	int cux=0;
@@ -123,6 +126,32 @@ void refresh_lcd() {
 
 	}
 
+
+	//Show cursor-----------------
+
+	if(cursor_changed){
+		cursor_changed = 0;
+		setCursor(preCursorPos[0], preCursorPos[1]);
+		write(' ');
+	}
+	preCursorPos[0] = cursorPos[0];
+	preCursorPos[1] = cursorPos[1];
+
+	setCursor(cursorPos[0], cursorPos[1]);
+	uint8_t interval = 3;
+	if(cursor_blink_flg < interval){
+		write(lcd[cursorPos[0]][cursorPos[1]]);
+	}
+	else{
+		write('_');
+	}
+	cursor_blink_flg++;
+	if(cursor_blink_flg > 2 * interval)
+		cursor_blink_flg = 0;
+
+//	cursor_blink_flg = !cursor_blink_flg;
+
+	//-----------------------------
 	// save last frame after update
 	memcpy(lcd_last,lcd,80);
 }
@@ -245,8 +274,17 @@ void showZombies() {
 void moveCursor(uint8_t x, uint8_t y){
 	if(x<0||y<0||x>=20||y>=4)
 			return;
-	cursorPos[0] = y;
-	cursorPos[1] = x;
+	cursor_changed =  1;
+	cursorPos[1] = y;
+	cursorPos[0] = x;
+}
+void ui_move_cursor_up_down(uint8_t upOrDown){
+	if(upOrDown){
+		moveCursor(cursorPos[0], cursorPos[1]+1);
+	}
+	else{
+		moveCursor(cursorPos[0], cursorPos[1]-1);
+	}
 }
 
 void ui_enterNameInit(){
