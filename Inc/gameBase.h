@@ -40,6 +40,7 @@
 #define STE_TYPE_GAME           0x02
 #define STE_TYPE_CONFRIM_POPUP  0x03
 
+#define STE_ENTER_NAME     0x0800 + STE_TYPE_CONFRIM_POPUP
 #define STE_READY_TO_PLAY  0x0A00 + STE_TYPE_CONFRIM_POPUP
 #define STE_START          0x0100 + STE_TYPE_CONFRIM_POPUP
 #define STE_LOOSE          0x0200 + STE_TYPE_CONFRIM_POPUP
@@ -53,7 +54,7 @@
 #define CHECK_STATE(state,candidStare) ((state&0xFF)==(candidStare))
 
 enum ZombiesType {MOZTAFA, JAVADI, MAMAD, ADELAPT};
-enum PlantsType {Potato, Roze, Venus};
+extern enum PlantsType {Potato, Roze, Venus};
 
 //Structs
 struct minsec{
@@ -102,9 +103,11 @@ extern int cursorX;
 extern int cursorY;
 extern int level;
 extern int score;
+extern uint8_t cursorPos[2];
 
 //Methods
 void mainGame(void);
 void update_time(void);
+struct plant initPlant(struct plant p, int i, int j, enum PlantsType type);
 
 #endif /* GAMEBASE_H_ */

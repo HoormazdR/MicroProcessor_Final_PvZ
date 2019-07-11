@@ -1,14 +1,8 @@
 #include "main.h"
 #include "stm32f3xx_hal.h"
 #include "ui.h"
+#include "gameBase.h"
 
-extern enum State{
-	GAME,
-	MENU,
-	ENTER_NAME
-};
-
-extern enum State state;
 char selectedChar = 'a';
 uint8_t clickTimes = 0;
 uint8_t pre_row = 0;
@@ -21,17 +15,6 @@ uint16_t pre_GPIO_PIN = 0;
 uint16_t pre_potan = 0;
 extern uint16_t potanLightRand[3];
 
-
-void keypadController(uint8_t row, uint8_t col){
-	state = GAME;
-	if(state == ENTER_NAME){
-		if(row > 1)
-			mobileKeypad(col - 1, row - 2);
-	}
-	else if(state == GAME){
-		gameKeypad(row, col);
-	}
-}
 
 
 void keypad_clicked(uint8_t row ,uint8_t col){
@@ -98,13 +81,27 @@ void mobileKeypad(uint8_t row, uint8_t col){
 		selectedChar -= 3;
 	}
 }
+
 void gameKeypad(uint8_t row, uint8_t col){
-	if( row == 1 && col == 2){
+	if (row == 1 && col == 2) {
 		ui_move_cursor_up_down(0);
+	} else if (row == 2 && col == 2) {
+		ui_move_cursor_up_down(1);
 	}
-	else if( row == 2 && col == 2){
-			ui_move_cursor_up_down(1);
-		}
+	else if (row == 1 && col == 1) {
+		actorOfTheGame.PvZPlants[0] = initPlant(actorOfTheGame.PvZPlants[0], 21, 2, Potato);
+		exist_plant++;
+	}
+}
+
+void keypadController(uint8_t row, uint8_t col){
+	if(GameState == STE_ENTER_NAME){
+		if(row > 1)
+			mobileKeypad(col - 1, row - 2);
+	}
+	else if(GameState == STE_NORMAL_GAME){
+		gameKeypad(row, col);
+	}
 }
 
 void potan_controller(){
@@ -112,7 +109,7 @@ void potan_controller(){
 	char a[30];
 	sprintf(&a,"potan: %d", potan);
 	log(a);
-	uint8_t diff = 20;
+	uint8_t diff = 30;
 	if(potan - pre_potan > diff){
 		log("\nleft\n");
 		ui_move_cursor_left_right(1);

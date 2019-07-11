@@ -141,7 +141,6 @@ int main(void)
 
 
   HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
-  ui_enterNameInit();
 
   //for testing the EnterName
 

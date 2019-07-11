@@ -6,18 +6,8 @@
 #include "LiquidCrystal.h"
 
 #include "gameBase.h"
+
 //the main state of whole game
-
-
-extern enum State{
-	GAME,
-	MENU,
-	ENTER_NAME
-};
-
-extern enum State state;
-int GameState = STE_NORMAL_GAME;
-
 unsigned char enemyType1[] = {
 		0x00, 0x0E, 0x0E, 0x1F, 0x04, 0x04, 0x0E, 0x0A
 };
@@ -39,7 +29,6 @@ uint8_t lcd[4][20];
 
 // last lcd frame
 uint8_t lcd_last[4][20];
-uint8_t cursorPos[2] = {0};
 uint8_t cursor_blink_flg = 0;
 uint8_t cursor_changed = 0;
 uint8_t preCursorPos[2] = {0};
@@ -101,7 +90,7 @@ void refresh_lcd() {
 
 	//Show cursor-----------------
 
-		if(cursor_changed){
+	/*	if(cursor_changed){
 			cursor_changed = 0;
 			putch(preCursorPos[0], preCursorPos[1], behind_cursor);
 			cursor_blink_flg = 0;
@@ -121,7 +110,7 @@ void refresh_lcd() {
 
 		cursor_blink_flg++;
 		if(cursor_blink_flg > 2 * interval)
-			cursor_blink_flg = 0;
+			cursor_blink_flg = 0; */
 
 	//	cursor_blink_flg = !cursor_blink_flg;
 
@@ -177,17 +166,17 @@ void refresh_7seg() {
 	// game time to current ragham
 	int t = time_game;
 	int ragham;
-	if(digit_7seg==0)
-		ragham=health;
-	if(digit_7seg==1)
-		ragham=t/100%10;
-	if(digit_7seg==2)
-		ragham=t/10%10;
 	if(digit_7seg==3)
+		ragham=health;
+	if(digit_7seg==2)
+		ragham=t/100%10;
+	if(digit_7seg==1)
+		ragham=t/10%10;
+	if(digit_7seg==0)
 		ragham=t%10;
 
 	HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 1);
-	if(digit_7seg==0)
+	if(digit_7seg==3)
 		HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 0);
 
 	// normal show 7seg
@@ -227,11 +216,15 @@ void screen_normal_game() {
 	char plant_Type1 = 2;
 
 	clearLCD();
-	for(int i = 0; i < zombie_alive; i++) {
-		if(frame%2 == 0 && actorOfTheGame.PvZzombies[i].isDead==0)
+	for(int i = 0; i < CON_ZOMBIE_SIZE; i++) {
+		if(frame%2 == 0 && actorOfTheGame.PvZzombies[i].isDead==0 && actorOfTheGame.PvZzombies[i].isInitial==1)
 			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, enemy);
-		else if (frame%2 == 1 && actorOfTheGame.PvZzombies[i].isDead==0)
+		else if(frame%2 == 0 && actorOfTheGame.PvZzombies[i].isDead==1 && actorOfTheGame.PvZzombies[i].isInitial==1)
+			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, ' ');
+		if (frame%2 == 1 && actorOfTheGame.PvZzombies[i].isDead==0 && actorOfTheGame.PvZzombies[i].isInitial==1)
 			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, enemy_f2);
+		else if(frame%2 == 1 && actorOfTheGame.PvZzombies[i].isDead==1 && actorOfTheGame.PvZzombies[i].isInitial==1)
+					putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, ' ');
 	}
 
 	for(int i = 0; i < exist_plant; i++) {
@@ -250,20 +243,9 @@ void screen_normal_game() {
 /*
  * @story: this function
  */
-void refresh_ui(void) {
-	int ok;
-	// normal game
-	if (state == GAME) {
-		screen_normal_game();
-		ok=1;
-	}
-
-	frame++;
-}
-
 
 void moveCursor(uint8_t x, uint8_t y){
-	if(x<0||y<0||x>=20||y>=4)
+	if(x<0||y<1||x>=20||y>=4)
 			return;
 	cursor_changed =  1;
 	cursorPos[1] = y;
@@ -277,6 +259,7 @@ void ui_move_cursor_up_down(uint8_t upOrDown){
 		moveCursor(cursorPos[0], cursorPos[1]-1);
 	}
 }
+
 void ui_move_cursor_left_right(uint8_t leftOrRight){
 
 	if(leftOrRight){
@@ -296,4 +279,30 @@ void ui_enterNameInit(){
 
 void ui_enterName_putchar(char c){
 	putch(cursorPos[1],cursorPos[0], c);
+}
+
+void ui_loose_screen() {
+	clearLCD();
+	putstr(5, 1, "YOU LOOSE !");
+}
+
+
+void refresh_ui(void) {
+	int ok;
+	// normal game
+	if (GameState == STE_NORMAL_GAME) {
+		screen_normal_game();
+		ok=1;
+	}
+
+	if (GameState == STE_ENTER_NAME) {
+		ui_enterNameInit();
+
+	}
+
+	if(GameState == STE_LOOSE) {
+		ui_loose_screen();
+	}
+
+	frame++;
 }

@@ -14,8 +14,7 @@ int exist_plant = 0;
 int zombie_alive = 0;
 int time_sys = 0;
 int time_game = 0;
-int cursorX = 0;
-int cursorY = 0;
+uint8_t cursorPos[2] = {0,3};
 struct actor actorOfTheGame;
 int level = 1;
 int last_chance_time = 0;
@@ -24,6 +23,7 @@ int score = 0;
 int plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
 int plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
 int plant_mode3_timer = CON_PLANT_VENUS_RESPAWN_TIME;
+int GameState = 0;
 
 
 
@@ -35,7 +35,6 @@ void deletePlant (struct plant array[], int position, int size) {
 
 void deleteZombie (struct zombie array[], int position, int size) {
 	array[position].isDead = 1;
-	zombie_alive--;
 }
 
 void looseHealth (struct zombie z[], int i) {
@@ -43,6 +42,8 @@ void looseHealth (struct zombie z[], int i) {
 		deleteZombie(z, i, 22);
 		health--;
 		last_chance_time = 0;
+		if(health <= 0)
+			GameState = STE_LOOSE;
 	}
 }
 
@@ -51,12 +52,12 @@ int checkZombieEat(int i) {
 		struct plant p = actorOfTheGame.PvZPlants[j];
 		struct zombie z = actorOfTheGame.PvZzombies[i];
 		if(p.place.posy == z.place.posy + 1 && p.place.posx == z.place.posx) {
+			p.health = p.health - z.power;
+			z.health -= p.power;
 			if(z.health <= 0)
 				deleteZombie(actorOfTheGame.PvZzombies, i, 22);
 			if(p.health <= 0)
 				deletePlant(actorOfTheGame.PvZPlants, j, 50);
-			z.health -= p.power;
-			p.health -= z.power;
 			return 1;
 		}
 	}
@@ -90,14 +91,11 @@ void addZombie() {
 		if(actorOfTheGame.PvZzombies[i].isInitial == 0)
 		{
 			actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], rand() % 20, MOZTAFA);
-			zombie_alive++;
-			zombie_enter++;
 			return;
 		}
 	}
 }
 
-//TODO: Need To Change
 void updateZomiesMove() {
 	int chance = rand() % 10 + 1;
 
@@ -105,8 +103,8 @@ void updateZomiesMove() {
 		addZombie();
 	}
 
-	for(int i = 0; i < zombie_alive; i++) {
-		if(!checkZombieEat(i)) {
+	for(int i = 0; i < CON_ZOMBIE_COUNT_INITIAL + (CON_ZOMBIE_COUNT_INCREASE_PER_LAP * (level - 1)); i++) {
+		if(!checkZombieEat(i) && actorOfTheGame.PvZzombies[i].isDead == 0 && actorOfTheGame.PvZzombies[i].isInitial == 1) {
 			actorOfTheGame.PvZzombies[i].TimeCounter = actorOfTheGame.PvZzombies[i].TimeCounter - 1000;
 			if(actorOfTheGame.PvZzombies[i].TimeCounter <= 0)
 			{
@@ -115,7 +113,6 @@ void updateZomiesMove() {
 				looseHealth(actorOfTheGame.PvZzombies, i);
 			}
 		}
-
 	}
 
 	refresh_ui();
@@ -185,10 +182,13 @@ void initLogic() {
 	zombie_alive = 0;
 	time_sys = 0;
 	time_game = 0;
-	cursorX = rand() % 4; //from 0 to 3
-	cursorY = rand() % 20; //from 0 to 19
+	cursorPos[1] = 3; //from 0 to 3
+	cursorPos[0] = 0; //from 0 to 19
 	last_chance_time = 0;
 	zombie_enter = 0;
+
+	actorOfTheGame.PvZPlants[0] = initPlant(actorOfTheGame.PvZPlants[0], 17, 2, Potato);
+	exist_plant++;
 
 }
 
