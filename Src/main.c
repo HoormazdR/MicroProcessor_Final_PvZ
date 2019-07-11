@@ -132,7 +132,7 @@ int main(void)
   begin(20,4);
   lcd_inital();
 
-  mainGame();
+  initLogic();
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_Base_Start_IT(&htim4);

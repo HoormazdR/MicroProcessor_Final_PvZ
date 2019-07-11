@@ -227,10 +227,10 @@ void screen_normal_game() {
 	char plant_Type1 = 2;
 
 	clearLCD();
-	for(int i = 0; i < exist_enemy; i++) {
-		if(frame%2 == 0)
+	for(int i = 0; i < zombie_alive; i++) {
+		if(frame%2 == 0 && actorOfTheGame.PvZzombies[i].isDead==0)
 			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, enemy);
-		else if (frame%2 == 1)
+		else if (frame%2 == 1 && actorOfTheGame.PvZzombies[i].isDead==0)
 			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, enemy_f2);
 	}
 
@@ -246,6 +246,10 @@ void screen_normal_game() {
 		frame = 1;
 }
 
+
+/*
+ * @story: this function
+ */
 void refresh_ui(void) {
 	int ok;
 	// normal game
@@ -257,12 +261,6 @@ void refresh_ui(void) {
 	frame++;
 }
 
-void showZombies() {
-	clearLCD();
-	for(int i = 0; i < 10; i++) {
-		putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, 'Z');
-	}
-}
 
 void moveCursor(uint8_t x, uint8_t y){
 	if(x<0||y<0||x>=20||y>=4)
