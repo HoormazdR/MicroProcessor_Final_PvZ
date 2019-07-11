@@ -4,79 +4,67 @@
 #include "gameBase.h"
 #include "LiquidCrystal.h"
 #include <stdlib.h>
+#include <time.h>
 
 #include "ui.h"
 
 //Variables
 int health = 5;
 int exist_plant = 0;
-int exist_enemy = 0;
+int zombie_alive = 0;
 int time_sys = 0;
 int time_game = 0;
 int cursorX = 0;
 int cursorY = 0;
 struct actor actorOfTheGame;
+int level = 1;
+int last_chance_time = 0;
+int zombie_enter = 0;
+int score = 0;
+int plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
+int plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
+int plant_mode3_timer = CON_PLANT_VENUS_RESPAWN_TIME;
 
-int looseHealth (uint8_t position) {
-	if(position == 4)
-		return 1;
-	return 0;
-}
+
 
 void deletePlant (struct plant array[], int position, int size) {
 	for (int c = position; c < size - 1; c++)
 	         array[c] = array[c+1];
+	exist_plant--;
+}
+
+void deleteZombie (struct zombie array[], int position, int size) {
+	array[position].isDead = 1;
+	zombie_alive--;
+}
+
+void looseHealth (struct zombie z[], int i) {
+	if(z[i].place.posy >= 4) {
+		deleteZombie(z, i, 22);
+		health--;
+		last_chance_time = 0;
+	}
 }
 
 int checkZombieEat(int i) {
 	for(int j = 0; j < exist_plant; j++) {
-		if(actorOfTheGame.PvZPlants[j].place.posy == actorOfTheGame.PvZzombies[i].place.posy + 1) {
-
+		struct plant p = actorOfTheGame.PvZPlants[j];
+		struct zombie z = actorOfTheGame.PvZzombies[i];
+		if(p.place.posy == z.place.posy + 1 && p.place.posx == z.place.posx) {
+			if(z.health <= 0)
+				deleteZombie(actorOfTheGame.PvZzombies, i, 22);
+			if(p.health <= 0)
+				deletePlant(actorOfTheGame.PvZPlants, j, 50);
+			z.health -= p.power;
+			p.health -= z.power;
 			return 1;
-	}
-}
-
-//TODO: Need To Change
-void updateZomiesMove() {
-	for(int i = 0; i < exist_enemy; i++) {
-		if(checkZombieEat(i)) {
-			actorOfTheGame.PvZzombies[i].TimeCounter = actorOfTheGame.PvZzombies[i].TimeCounter - 1000;
-			if(actorOfTheGame.PvZzombies[i].TimeCounter <= 0)
-			{
-				actorOfTheGame.PvZzombies[i].place.posy++;
-				if(looseHealth(actorOfTheGame.PvZzombies[i].place.posy))
-					health--;
-				if(actorOfTheGame.PvZzombies[i].place.posy >= 4)
-					actorOfTheGame.PvZzombies[i].place.posy = 0;
-				actorOfTheGame.PvZzombies[i].TimeCounter = CON_ENEMY_STEP_INTIAL;
-			}
 		}
-
 	}
-
-	refresh_ui();
+	return 0;
 }
 
-void timer_addation () {
-	time_sys += 1;
-	time_game += 1;
-}
-
-void update_time() {
-	timer_addation();
-
-	if(GameState == STE_NORMAL_GAME)
-		updateZomiesMove();
-}
-
-int shouldZombieMove(struct zombie z) {
-	if(z.TimeCounter <= 0)
-		return 1;
-	else
-		return 0;
-}
-
-struct zombie initZombie(struct zombie z,uint8_t i, uint8_t j, enum ZombiesType type){
+//makes new zombie
+struct zombie initZombie(struct zombie z,uint8_t i, enum ZombiesType type){
 	if(type == MOZTAFA)
 		z.power = CON_ZOMBIE_MOZTAFA_POWER;
 	else if (type == JAVADI)
@@ -87,15 +75,88 @@ struct zombie initZombie(struct zombie z,uint8_t i, uint8_t j, enum ZombiesType 
 		z.power = CON_ZOMBIE_ADELAPT_POWER;
 
 	z.health = CON_ZOMBIE_BASE_HEALTH;
-	z.TimeCounter = CON_ENEMY_STEP_INTIAL;
+	z.TimeCounter = CON_ZOMBIE_STEP_INTIAL - ((level - 1) * CON_ZOMBIE_STEP_DECREASE_PER_LAP);
 	z.type = type;
 	z.place.posx = i;
-	z.place.posy = j;
+	z.place.posy = 0;
+	z.isDead = 0;
+	z.isInitial = 1;
 
 	return z;
 }
 
-struct plant initPLant(struct plant p, int i, int j, enum PlantsType type) {
+void addZombie() {
+	for(int i = 0; i < CON_ZOMBIE_COUNT_INITIAL + (CON_ZOMBIE_COUNT_INCREASE_PER_LAP * (level - 1)); i++) {
+		if(actorOfTheGame.PvZzombies[i].isInitial == 0)
+		{
+			actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], rand() % 20, MOZTAFA);
+			zombie_alive++;
+			zombie_enter++;
+			return;
+		}
+	}
+}
+
+//TODO: Need To Change
+void updateZomiesMove() {
+	int chance = rand() % 10 + 1;
+
+	if(zombie_alive < 5 && chance > 6) {
+		addZombie();
+	}
+
+	for(int i = 0; i < zombie_alive; i++) {
+		if(!checkZombieEat(i)) {
+			actorOfTheGame.PvZzombies[i].TimeCounter = actorOfTheGame.PvZzombies[i].TimeCounter - 1000;
+			if(actorOfTheGame.PvZzombies[i].TimeCounter <= 0)
+			{
+				actorOfTheGame.PvZzombies[i].place.posy++;
+				actorOfTheGame.PvZzombies[i].TimeCounter = CON_ZOMBIE_STEP_INTIAL;
+				looseHealth(actorOfTheGame.PvZzombies, i);
+			}
+		}
+
+	}
+
+	refresh_ui();
+}
+
+void timer_addation () {
+	time_sys += 1;
+	if(CHECK_STATE(GameState, STE_TYPE_GAME)) {
+		time_game++;
+		last_chance_time++;
+	}
+}
+
+void updatePlantCoolDown() {
+	if(plant_mode1_timer > 0)
+		plant_mode1_timer--;
+	if(plant_mode2_timer > 0)
+		plant_mode2_timer--;
+	if(plant_mode3_timer > 0)
+		plant_mode3_timer--;
+}
+
+void update_time() {
+	timer_addation();
+
+	if(GameState == STE_NORMAL_GAME) {
+		updateZomiesMove();
+		updatePlantCoolDown();
+	}
+
+}
+
+int shouldZombieMove(struct zombie z) {
+	if(z.TimeCounter <= 0)
+		return 1;
+	else
+		return 0;
+}
+
+//makes new plant
+struct plant initPlant(struct plant p, int i, int j, enum PlantsType type) {
 	if(type == Potato)
 		p.power = CON_PLANT_POTATO_EAT_POINT;
 	else if (type == Roze)
@@ -103,6 +164,7 @@ struct plant initPLant(struct plant p, int i, int j, enum PlantsType type) {
 	else if (type == Venus)
 		p.power = CON_PLANT_VENUS_EAT_POINT;
 
+	p.health = p.power;
 	p.type = type;
 	p.place.posx = i;
 	p.place.posy = j;
@@ -110,12 +172,26 @@ struct plant initPLant(struct plant p, int i, int j, enum PlantsType type) {
 	return p;
 }
 
-void mainGame () {
+//New Game
+void initLogic() {
+	srand(time(NULL));   // Initialization, should only be called once.
 
-	exist_plant = 1;
-	actorOfTheGame.PvZPlants[0] = initPLant(actorOfTheGame.PvZPlants[0], 3, 2, Venus);
-	exist_enemy = 5;
-	for(int i = 0; i < exist_enemy; i++) {
-		actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], i, 0, MOZTAFA);
-	}
+	//State Game
+	GameState = STE_NORMAL_GAME;
+	level = 1;
+	score = 0;
+	health = CON_HEALTH;
+	exist_plant = 0;
+	zombie_alive = 0;
+	time_sys = 0;
+	time_game = 0;
+	cursorX = rand() % 4; //from 0 to 3
+	cursorY = rand() % 20; //from 0 to 19
+	last_chance_time = 0;
+	zombie_enter = 0;
+
+}
+
+void calculateScore () {
+	score = level * (time_game + last_chance_time);
 }
