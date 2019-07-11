@@ -23,7 +23,7 @@ extern uint16_t potanLightRand[3];
 
 
 void keypadController(uint8_t row, uint8_t col){
-	state = GAME;
+
 	if(state == ENTER_NAME){
 		if(row > 1)
 			mobileKeypad(col - 1, row - 2);
