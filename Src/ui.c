@@ -7,13 +7,15 @@
 
 #include "gameBase.h"
 //the main state of whole game
+
+
 extern enum State{
 	GAME,
 	MENU,
 	ENTER_NAME
 };
 
-extern enum state;
+extern enum State state;
 int GameState = STE_NORMAL_GAME;
 
 unsigned char enemyType1[] = {
@@ -37,8 +39,30 @@ uint8_t lcd[4][20];
 
 // last lcd frame
 uint8_t lcd_last[4][20];
-
 uint8_t cursorPos[2] = {0};
+uint8_t cursor_blink_flg = 0;
+uint8_t cursor_changed = 0;
+uint8_t preCursorPos[2] = {0};
+
+//uart log
+
+extern uint16_t potanLightRand[3];
+extern UART_HandleTypeDef huart3;
+
+
+
+
+void log(char str[]){
+	int size = strlen(str);
+	HAL_UART_Transmit(&huart3, str, size, 1000);
+}
+void log_adc(){
+	  char whatToTransfare[40];
+	  sprintf(&whatToTransfare, "Potan: %4d, Light: %4d, Rand: %4d \n"
+			  ,potanLightRand[0], potanLightRand[1], potanLightRand[2]);
+	  log(whatToTransfare);
+}
+
 
 //Based Function for lcd and stuff
 // lcd low level functions
@@ -71,16 +95,37 @@ void clearLCD() {
 }
 
 // this function refresh just changed parts of lcd
-
-void moveCursor(uint8_t x, uint8_t y){
-	if(x<0||y<0||x>=20||y>=4)
-			return;
-	cursorPos[0] = y;
-	cursorPos[1] = x;
-}
-
-uint8_t cursor_interval = 0;
+char behind_cursor = ' ';
 void refresh_lcd() {
+
+
+	//Show cursor-----------------
+
+		if(cursor_changed){
+			cursor_changed = 0;
+			putch(preCursorPos[0], preCursorPos[1], behind_cursor);
+			cursor_blink_flg = 0;
+		}
+		preCursorPos[0] = cursorPos[0];
+		preCursorPos[1] = cursorPos[1];
+
+		uint8_t interval = 3;
+		if(cursor_blink_flg == 0){
+			behind_cursor = lcd[cursorPos[1]][cursorPos[0]];
+			putch(cursorPos[0], cursorPos[1], '_');
+		}
+
+		else if(cursor_blink_flg == interval){
+			putch(cursorPos[0], cursorPos[1], behind_cursor);
+		}
+
+		cursor_blink_flg++;
+		if(cursor_blink_flg > 2 * interval)
+			cursor_blink_flg = 0;
+
+	//	cursor_blink_flg = !cursor_blink_flg;
+
+		//-----------------------------
 
 	int cux=0;
 	for (int y=0;y<4;y++) {
@@ -97,6 +142,8 @@ void refresh_lcd() {
 		}
 
 	}
+
+
 
 	// save last frame after update
 	memcpy(lcd_last,lcd,80);
@@ -206,7 +253,7 @@ void screen_normal_game() {
 void refresh_ui(void) {
 	int ok;
 	// normal game
-	if (GameState == STE_NORMAL_GAME) {
+	if (state == GAME) {
 		screen_normal_game();
 		ok=1;
 	}
@@ -215,3 +262,38 @@ void refresh_ui(void) {
 }
 
 
+void moveCursor(uint8_t x, uint8_t y){
+	if(x<0||y<0||x>=20||y>=4)
+			return;
+	cursor_changed =  1;
+	cursorPos[1] = y;
+	cursorPos[0] = x;
+}
+void ui_move_cursor_up_down(uint8_t upOrDown){
+	if(upOrDown){
+		moveCursor(cursorPos[0], cursorPos[1]+1);
+	}
+	else{
+		moveCursor(cursorPos[0], cursorPos[1]-1);
+	}
+}
+void ui_move_cursor_left_right(uint8_t leftOrRight){
+
+	if(leftOrRight){
+		moveCursor(cursorPos[0]+1, cursorPos[1]);
+	}
+	else{
+		moveCursor(cursorPos[0]-1, cursorPos[1]);
+	}
+}
+
+void ui_enterNameInit(){
+	clearLCD();
+	putstr(0,0,"Enter your name");
+	putstr(7,2,"****");
+	moveCursor(7, 2);
+}
+
+void ui_enterName_putchar(char c){
+	putch(cursorPos[1],cursorPos[0], c);
+}
