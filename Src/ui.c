@@ -15,7 +15,7 @@ extern enum State{
 	ENTER_NAME
 };
 
-extern enum state;
+extern enum State state;
 int GameState = STE_NORMAL_GAME;
 
 unsigned char enemyType1[] = {
@@ -95,8 +95,37 @@ void clearLCD() {
 }
 
 // this function refresh just changed parts of lcd
-
+char behind_cursor = ' ';
 void refresh_lcd() {
+
+
+	//Show cursor-----------------
+
+		if(cursor_changed){
+			cursor_changed = 0;
+			putch(preCursorPos[0], preCursorPos[1], behind_cursor);
+			cursor_blink_flg = 0;
+		}
+		preCursorPos[0] = cursorPos[0];
+		preCursorPos[1] = cursorPos[1];
+
+		uint8_t interval = 3;
+		if(cursor_blink_flg == 0){
+			behind_cursor = lcd[cursorPos[1]][cursorPos[0]];
+			putch(cursorPos[0], cursorPos[1], '_');
+		}
+
+		else if(cursor_blink_flg == interval){
+			putch(cursorPos[0], cursorPos[1], behind_cursor);
+		}
+
+		cursor_blink_flg++;
+		if(cursor_blink_flg > 2 * interval)
+			cursor_blink_flg = 0;
+
+	//	cursor_blink_flg = !cursor_blink_flg;
+
+		//-----------------------------
 
 	int cux=0;
 	for (int y=0;y<4;y++) {
@@ -115,31 +144,7 @@ void refresh_lcd() {
 	}
 
 
-	//Show cursor-----------------
 
-	if(cursor_changed){
-		cursor_changed = 0;
-		setCursor(preCursorPos[0], preCursorPos[1]);
-		write(' ');
-	}
-	preCursorPos[0] = cursorPos[0];
-	preCursorPos[1] = cursorPos[1];
-
-	setCursor(cursorPos[0], cursorPos[1]);
-	uint8_t interval = 3;
-	if(cursor_blink_flg < interval){
-		write(lcd[cursorPos[0]][cursorPos[1]]);
-	}
-	else{
-		write('_');
-	}
-	cursor_blink_flg++;
-	if(cursor_blink_flg > 2 * interval)
-		cursor_blink_flg = 0;
-
-//	cursor_blink_flg = !cursor_blink_flg;
-
-	//-----------------------------
 	// save last frame after update
 	memcpy(lcd_last,lcd,80);
 }
@@ -244,7 +249,7 @@ void screen_normal_game() {
 void refresh_ui(void) {
 	int ok;
 	// normal game
-	if (GameState == STE_NORMAL_GAME) {
+	if (state == GAME) {
 		screen_normal_game();
 		ok=1;
 	}
@@ -275,6 +280,7 @@ void ui_move_cursor_up_down(uint8_t upOrDown){
 	}
 }
 void ui_move_cursor_left_right(uint8_t leftOrRight){
+
 	if(leftOrRight){
 		moveCursor(cursorPos[0]+1, cursorPos[1]);
 	}
