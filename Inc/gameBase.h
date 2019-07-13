@@ -44,6 +44,7 @@
 #define STE_TYPE_CONFRIM_POPUP  0x03
 
 #define STE_ENTER_NAME     0x0800 + STE_TYPE_CONFRIM_POPUP
+#define STE_MENU			0x0900 + STE_TYPE_CONFRIM_POPUP
 #define STE_READY_TO_PLAY  0x0A00 + STE_TYPE_CONFRIM_POPUP
 #define STE_START          0x0100 + STE_TYPE_CONFRIM_POPUP
 #define STE_LOOSE          0x0200 + STE_TYPE_CONFRIM_POPUP
@@ -99,7 +100,7 @@ extern int exist_plant;
 extern int zombie_alive;
 extern int GameState;
 extern int GameState_next;
-int time_sys;
+extern int time_sys;
 int time_game;
 extern struct actor actorOfTheGame;
 extern int cursorX;

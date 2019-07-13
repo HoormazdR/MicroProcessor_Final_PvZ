@@ -74,8 +74,6 @@
 #define SevSeg_a2_GPIO_Port GPIOC
 #define SSEG_i2_Pin GPIO_PIN_2
 #define SSEG_i2_GPIO_Port GPIOF
-#define B1_Pin GPIO_PIN_0
-#define B1_GPIO_Port GPIOA
 #define SSEG_i3_Pin GPIO_PIN_1
 #define SSEG_i3_GPIO_Port GPIOA
 #define SSEG_i1_Pin GPIO_PIN_2
@@ -141,7 +139,7 @@
 
 
 /*ins */
-#define KEYPAD_ROW1_PIN GPIO_PIN_0
+#define KEYPAD_ROW1_PIN GPIO_PIN_13
 #define KEYPAD_ROW1_PORT GPIOB
 
 #define KEYPAD_ROW2_PIN GPIO_PIN_1

@@ -23,10 +23,14 @@ int score = 0;
 int plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
 int plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
 int plant_mode3_timer = CON_PLANT_VENUS_RESPAWN_TIME;
-int GameState = 0;
+int GameState = STE_MENU;
+int GameState_next = 0;
 extern uint16_t potanLightRand[3];
+int getReadyPlant = 0;
 
-
+int getRand() {
+	return potanLightRand[2]%100;
+}
 
 void deletePlant (struct plant array[], int position, int size) {
 	for (int c = position; c < size - 1; c++)
@@ -38,6 +42,7 @@ void deleteZombie (struct zombie array[], int position, int size) {
 //	for (int c = position; c < size - 1; c++)
 //		         array[c] = array[c+1];
 	array[position].isDead = 1;
+	zombie_alive--;
 }
 
 void looseHealth (struct zombie z[], int i) {
@@ -46,7 +51,7 @@ void looseHealth (struct zombie z[], int i) {
 		health--;
 		last_chance_time = 0;
 		if(health <= 0)
-			changeState(STE_LOOSE);
+			changeState(STE_LOOSE, STE_ENTER_NAME);
 	}
 }
 
@@ -68,12 +73,12 @@ int checkZombieEat(int i) {
 }
 
 //makes new zombie
-struct zombie initZombie(struct zombie z,uint8_t i, enum ZombiesType type){
-	if(type == MOZTAFA)
+struct zombie initZombie(struct zombie z,uint8_t i, int type){
+	if(type == 0)
 		z.power = CON_ZOMBIE_MOZTAFA_POWER;
-	else if (type == JAVADI)
+	else if (type == 1)
 		z.power = CON_ZOMBIE_JAVADI_POWER;
-	else if (type == MAMAD)
+	else if (type == 2)
 		z.power = CON_ZOMBIE_MAMAD_POWER;
 	else
 		z.power = CON_ZOMBIE_ADELAPT_POWER;
@@ -93,7 +98,8 @@ void addZombie() {
 	for(int i = 0; i < CON_ZOMBIE_COUNT_INITIAL + (CON_ZOMBIE_COUNT_INCREASE_PER_LAP * (level - 1)); i++) {
 		if(actorOfTheGame.PvZzombies[i].isInitial == 0)
 		{
-			actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], rand() % 20, MOZTAFA);
+			actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], getRand() % 24, getRand() % 4);
+			zombie_alive++;
 			return;
 		}
 	}
@@ -112,9 +118,12 @@ void makeNewZombie() {
 }
 
 void updateZomiesMove() {
-	int chance = rand() % 10 + 1;
+	int chance = getRand() % 10 + 1;
 
-	if(zombie_alive < 5 && chance > 6) {
+	if(exist_plant > 6)
+		getReadyPlant = 0;
+
+	if(zombie_alive < 5 && chance > 3 && !getReadyPlant) {
 		addZombie();
 	}
 
@@ -133,7 +142,7 @@ void updateZomiesMove() {
 	if(time_game%20 == 0 && time_game > 0) {
 		level++;
 		makeNewZombie();
-		changeState(STE_WIN);
+		changeState(STE_WIN, STE_ENTER_NAME);
 	}
 
 }
@@ -144,7 +153,7 @@ void calculateScore () {
 
 void timer_addation () {
 	time_sys += 1;
-	if(CHECK_STATE(GameState, STE_TYPE_GAME)) {
+	if(CHECK_STATE(GameState, STE_TYPE_GAME) && !getReadyPlant) {
 		time_game++;
 		last_chance_time++;
 	}
@@ -164,7 +173,7 @@ void updatePlantCoolDown() {
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
 	}
 	else if(plant_mode2_timer <= 0)
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 1);
 	if(plant_mode3_timer > 0)
 	{
 		plant_mode3_timer--;
@@ -176,10 +185,6 @@ void updatePlantCoolDown() {
 
 void update_time() {
 	timer_addation();
-
-	char mos[50];
-	sprintf(mos, "Rand : %d", potanLightRand[2]);
-	log(mos);
 
 	if(GameState == STE_NORMAL_GAME) {
 		updateZomiesMove();
@@ -218,7 +223,6 @@ void initLogic() {
 	srand(time(NULL));   // Initialization, should only be called once.
 
 	//State Game
-	changeState(STE_NORMAL_GAME);
 	level = 1;
 	score = 0;
 	health = CON_HEALTH;
@@ -230,7 +234,7 @@ void initLogic() {
 	cursorPos[0] = 0; //from 0 to 19
 	last_chance_time = 0;
 	zombie_enter = 0;
-
+	getReadyPlant = 1;
 //	for(int i = 0;i< 23;i++)
 //	{
 //		actorOfTheGame.PvZPlants[i] = initPlant(actorOfTheGame.PvZPlants[i], i, 3, Venus);

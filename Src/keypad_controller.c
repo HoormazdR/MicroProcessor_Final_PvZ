@@ -58,7 +58,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 	  }
 	  pre_GPIO_PIN = GPIO_PIN_NUMBER;
 	  debunc_counter = 0;
-	if(GPIO_PIN_NUMBER == 1)
+
+	  char a[20];
+	  sprintf(a, "PIN nUmber : %d  ", GPIO_PIN_NUMBER);
+	  log(a);
+	if(GPIO_PIN_NUMBER == 8192)
 		keypad_clicked(1, col_num);
 	else if(GPIO_PIN_NUMBER == 2)
 		keypad_clicked(2, col_num);
@@ -110,29 +114,39 @@ void keypadController(uint8_t row, uint8_t col){
 		if(row > 1)
 			mobileKeypad(col - 1, row - 2);
 	}
-	else if(GameState == STE_NORMAL_GAME){
+	else if(GameState == STE_NORMAL_GAME || GameState == STE_MENU){
 		gameKeypad(row, col);
+	}
+
+	if(GameState == STE_MENU) {
+		if(col == 1 && row == 4) {
+			if(cursorPos[1] == 1)
+				changeState(STE_NORMAL_GAME, STE_END);
+		}
 	}
 }
 
-int HW_VOLOME_MIN = 2;
-int HW_VOLOME_MAX = 63;
+int HW_VOLOME_MIN = 200;
+int HW_VOLOME_MAX = 4000;
 void potan_controller(){
+
 	uint16_t potan = potanLightRand[0];
+	// dynamic calibration
+	if(potan<HW_VOLOME_MIN)
+		HW_VOLOME_MIN=potan;
+	if(potan>HW_VOLOME_MAX)
+		HW_VOLOME_MAX=potan;
 
-	if (potan < HW_VOLOME_MIN)
-		HW_VOLOME_MIN = potan;
-	if (potan > HW_VOLOME_MAX)
-		HW_VOLOME_MAX = potan;
+	if(GameState == STE_NORMAL_GAME)
+	{
+		potan = (potan-HW_VOLOME_MIN)*(CON_LCD_W_CHANGE-1) / (HW_VOLOME_MAX-HW_VOLOME_MIN);
 
-	if (CHECK_STATE(GameState, STE_TYPE_GAME)) {
-		potan = (potan - HW_VOLOME_MIN) * (CON_LCD_W_CHANGE - 1) / (HW_VOLOME_MAX - HW_VOLOME_MIN);
-
-		if (cursorPos[0] > potan) {
-			log("\nleft\n");
+		if (cursorPos[0] > potan)
+		{
 			ui_move_cursor_left_right(0);
-		} else if (cursorPos[0] < potan) {
-			log("\nright\n");
+		}
+		else if (cursorPos[0] < potan)
+		{
 			ui_move_cursor_left_right(1);
 		}
 	}

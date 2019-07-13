@@ -15,7 +15,7 @@ void ui_move_cursor_up_down(uint8_t upOrDown);
 void ui_enterName_putchar(char c);
 void ui_move_cursor_left_right(uint8_t leftOrRight);
 void cursorUpdate(void);
-void changeState(int toState);
+void changeState(int toState, int nextState);
 
 // Internal Macros
 #define HEX__(n) 0x##n##LU

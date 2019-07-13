@@ -12,8 +12,16 @@ unsigned char enemyType1[] = {
 		0x00, 0x0E, 0x0E, 0x1F, 0x04, 0x04, 0x0E, 0x0A
 };
 
-unsigned char enemyType1_frame2[] = {
-		0x00, 0x0E, 0x0E, 0x04, 0x1F, 0x04, 0x0E, 0x0A
+unsigned char enemyType2[] = {
+	  0x0A, 0x0E, 0x0E, 0x04, 0x0E, 0x15, 0x0E, 0x0A
+};
+
+unsigned char enemyType3[] = {
+	  0x0C, 0x1C, 0x04, 0x1F, 0x04, 0x1F, 0x15, 0x15
+};
+
+unsigned char enemyType4[] = {
+	  0x0C, 0x0C, 0x08, 0x0E, 0x0F, 0x0F, 0x0E, 0x0A
 };
 
 unsigned char plantType1[] = {
@@ -182,41 +190,60 @@ void lcd_inital() {
 long frame = 0;
 long frame_starttime=0;
 
-void changeState(int toState){
+void changeState(int toState, int nextState){
 
-
+	if(GameState == STE_MENU && toState == STE_NORMAL_GAME)
+			initLogic();
 	// change ui
 	GameState=toState;
+	GameState_next = nextState;
 
 	// change ui things
 	frame=0;
 	frame_starttime=time_sys;
+
+	if(GameState == STE_MENU)
+		cursorPos[1] = 1;
+
+
+}
+
+void showZombieCharactor(int i, char actorf1) {
+	if(actorOfTheGame.PvZzombies[i].isDead==0 && actorOfTheGame.PvZzombies[i].isInitial==1)
+		putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, actorf1);
+	else if(actorOfTheGame.PvZzombies[i].isDead==1 && actorOfTheGame.PvZzombies[i].isInitial==1)
+		putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, ' ');
 }
 
 void screen_normal_game() {
 	if(frame==0) {
 		 createChar(0, enemyType1);
-		 createChar(1, enemyType1_frame2);
+		 createChar(1, enemyType2);
+		 createChar(5, enemyType3);
+		 createChar(6, enemyType4);
 		 createChar(2, plantType1);
 		 createChar(3, plantType2);
 		 createChar(4, plantType3);
 	}
-	char enemy = 0;
-	char enemy_f2 = 1;
+	char enemy_mostafa = 0;
+	char enemy_javadi = 1;
+	char enemy_mamad = 5;
+	char enemy_adelapt = 6;
 	char plant_Type1 = 2;
 	char plant_Type2 = 3;
 	char plant_Type3 = 4;
 
 	clearLCD();
 	for(int i = 0; i < CON_ZOMBIE_SIZE; i++) {
-		if(frame%20 >= 0 && frame%20 <= 10 && actorOfTheGame.PvZzombies[i].isDead==0 && actorOfTheGame.PvZzombies[i].isInitial==1)
-			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, enemy);
-		else if(frame%20 >= 0 && frame%20 <= 10 && actorOfTheGame.PvZzombies[i].isDead==1 && actorOfTheGame.PvZzombies[i].isInitial==1)
-			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, ' ');
-		if (frame%20 >= 11 && frame%20 < 20  && actorOfTheGame.PvZzombies[i].isDead==0 && actorOfTheGame.PvZzombies[i].isInitial==1)
-			putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, enemy_f2);
-		else if(frame%20 >= 11 && frame%20 < 20 && actorOfTheGame.PvZzombies[i].isDead==1 && actorOfTheGame.PvZzombies[i].isInitial==1)
-					putch(actorOfTheGame.PvZzombies[i].place.posx, actorOfTheGame.PvZzombies[i].place.posy, ' ');
+		if(actorOfTheGame.PvZzombies[i].type == 0)
+			showZombieCharactor(i, enemy_mostafa);
+		else if (actorOfTheGame.PvZzombies[i].type == 1)
+			showZombieCharactor(i, enemy_javadi);
+		else if (actorOfTheGame.PvZzombies[i].type == 2)
+			showZombieCharactor(i, enemy_mamad);
+		else if (actorOfTheGame.PvZzombies[i].type == 3)
+			showZombieCharactor(i, enemy_adelapt);
+
 	}
 
 	for(int i = 0; i < exist_plant; i++) {
@@ -293,10 +320,17 @@ void ui_win_screen() {
 		putstr(12,1, a);
 
 	if(frame > 25)
-		changeState(STE_NORMAL_GAME);
+		changeState(STE_NORMAL_GAME, STE_END);
 }
 
+void ui_main_menu() {
+	clearLCD();
+	putstr(6, 1,"New Game");
+	putstr(6, 2,"Load Game");
+	putstr(6, 3,"About");
 
+	putch(5, cursorPos[1], '>');
+}
 
 void refresh_ui(void) {
 	int ok;
@@ -319,6 +353,11 @@ void refresh_ui(void) {
 
 	if(GameState == STE_WIN) {
 		ui_win_screen();
+		ok=1;
+	}
+
+	if(GameState == STE_MENU) {
+		ui_main_menu();
 		ok=1;
 	}
 
