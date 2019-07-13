@@ -1,14 +1,8 @@
 #include "main.h"
 #include "stm32f3xx_hal.h"
 #include "ui.h"
+#include "gameBase.h"
 
-extern enum State{
-	GAME,
-	MENU,
-	ENTER_NAME
-};
-
-extern enum State state;
 char selectedChar = 'a';
 uint8_t clickTimes = 0;
 uint8_t pre_row = 0;
@@ -75,7 +69,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 	  }
 	  pre_GPIO_PIN = GPIO_PIN_NUMBER;
 	  debunc_counter = 0;
-	if(GPIO_PIN_NUMBER == 1)
+
+	  char a[20];
+	  sprintf(a, "PIN nUmber : %d  ", GPIO_PIN_NUMBER);
+	  log(a);
+	if(GPIO_PIN_NUMBER == 8192)
 		keypad_clicked(1, col_num);
 	else if(GPIO_PIN_NUMBER == 2)
 		keypad_clicked(2, col_num);
@@ -98,29 +96,70 @@ void mobileKeypad(uint8_t row, uint8_t col){
 		selectedChar -= 3;
 	}
 }
+
 void gameKeypad(uint8_t row, uint8_t col){
-	if( row == 1 && col == 2){
+	if (row == 1 && col == 2) {
 		ui_move_cursor_up_down(0);
+	} else if (row == 2 && col == 2) {
+		ui_move_cursor_up_down(1);
 	}
-	else if( row == 2 && col == 2){
-			ui_move_cursor_up_down(1);
-		}
+	else if (row == 1 && col == 1 && plant_mode1_timer == 0) {
+		actorOfTheGame.PvZPlants[exist_plant] = initPlant(actorOfTheGame.PvZPlants[exist_plant], cursorPos[0], cursorPos[1], Potato);
+		exist_plant++;
+		plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
+	}
+	else if (row == 2 && col == 1 && plant_mode2_timer == 0) {
+		actorOfTheGame.PvZPlants[exist_plant] = initPlant(actorOfTheGame.PvZPlants[exist_plant], cursorPos[0], cursorPos[1], Rose);
+		exist_plant++;
+		plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
+	}
+	else if (row == 3 && col == 1 && plant_mode3_timer == 0) {
+		actorOfTheGame.PvZPlants[exist_plant] = initPlant(actorOfTheGame.PvZPlants[exist_plant], cursorPos[0], cursorPos[1], Venus);
+		exist_plant++;
+		plant_mode3_timer = CON_PLANT_VENUS_RESPAWN_TIME;
+	}
 }
 
+void keypadController(uint8_t row, uint8_t col){
+	if(GameState == STE_ENTER_NAME){
+		if(row > 1)
+			mobileKeypad(col - 1, row - 2);
+	}
+	else if(GameState == STE_NORMAL_GAME || GameState == STE_MENU){
+		gameKeypad(row, col);
+	}
+
+	if(GameState == STE_MENU) {
+		if(col == 1 && row == 4) {
+			if(cursorPos[1] == 1)
+				changeState(STE_NORMAL_GAME, STE_END);
+		}
+	}
+}
+
+int HW_VOLOME_MIN = 200;
+int HW_VOLOME_MAX = 4000;
 void potan_controller(){
+
 	uint16_t potan = potanLightRand[0];
-	char a[30];
-	sprintf(&a,"potan: %d", potan);
-	log(a);
-	uint8_t diff = 20;
-	if(potan - pre_potan > diff){
-		log("\nleft\n");
-		ui_move_cursor_left_right(1);
+	// dynamic calibration
+	if(potan<HW_VOLOME_MIN)
+		HW_VOLOME_MIN=potan;
+	if(potan>HW_VOLOME_MAX)
+		HW_VOLOME_MAX=potan;
+
+	if(GameState == STE_NORMAL_GAME)
+	{
+		potan = (potan-HW_VOLOME_MIN)*(CON_LCD_W_CHANGE-1) / (HW_VOLOME_MAX-HW_VOLOME_MIN);
+
+		if (cursorPos[0] > potan)
+		{
+			ui_move_cursor_left_right(0);
+		}
+		else if (cursorPos[0] < potan)
+		{
+			ui_move_cursor_left_right(1);
+		}
 	}
-	else if(pre_potan - potan > diff){
-		log("\nright\n");
-		ui_move_cursor_left_right(0);
-	}
-	pre_potan = potan;
 
 }

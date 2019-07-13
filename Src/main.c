@@ -82,12 +82,6 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN 0 */
 uint16_t potanLightRand[3];
-enum State{
-	GAME,
-	MENU,
-	ENTER_NAME
-};
-enum State state = ENTER_NAME;
 /* USER CODE END 0 */
 
 /**
@@ -132,7 +126,6 @@ int main(void)
   begin(20,4);
   lcd_inital();
 
-  initLogic();
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_Base_Start_IT(&htim4);
@@ -141,7 +134,6 @@ int main(void)
 
 
   HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
-  ui_enterNameInit();
 
   //for testing the EnterName
 

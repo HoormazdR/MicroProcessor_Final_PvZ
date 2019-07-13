@@ -13,7 +13,10 @@
 #define CON_LAP_TIME 20000 // ms
 #define CON_LCD_W 20
 #define CON_LCD_H 4
+#define CON_LCD_W_CHANGE (CON_LCD_W)
 #define CON_HEALTH 5
+
+
 #define CON_ZOMBIE_COUNT_INITIAL 8
 #define CON_ZOMBIE_COUNT_INCREASE_PER_LAP 2
 #define CON_ZOMBIE_MAX_SCREEN_SIZE 5
@@ -40,6 +43,8 @@
 #define STE_TYPE_GAME           0x02
 #define STE_TYPE_CONFRIM_POPUP  0x03
 
+#define STE_ENTER_NAME     0x0800 + STE_TYPE_CONFRIM_POPUP
+#define STE_MENU			0x0900 + STE_TYPE_CONFRIM_POPUP
 #define STE_READY_TO_PLAY  0x0A00 + STE_TYPE_CONFRIM_POPUP
 #define STE_START          0x0100 + STE_TYPE_CONFRIM_POPUP
 #define STE_LOOSE          0x0200 + STE_TYPE_CONFRIM_POPUP
@@ -53,7 +58,7 @@
 #define CHECK_STATE(state,candidStare) ((state&0xFF)==(candidStare))
 
 enum ZombiesType {MOZTAFA, JAVADI, MAMAD, ADELAPT};
-enum PlantsType {Potato, Roze, Venus};
+extern enum PlantsType {Potato, Rose, Venus};
 
 //Structs
 struct minsec{
@@ -68,7 +73,7 @@ struct Point {
 
 struct zombie {
 	struct Point place;
-	uint8_t health;
+	int health;
 	uint8_t power;
 	int TimeCounter;
 	enum ZombiesType type;
@@ -79,7 +84,7 @@ struct zombie {
 struct plant {
 	struct Point place;
 	uint8_t power;
-	uint8_t health;
+	int health;
 	enum PlantsType type;
 };
 
@@ -95,16 +100,21 @@ extern int exist_plant;
 extern int zombie_alive;
 extern int GameState;
 extern int GameState_next;
-int time_sys;
+extern int time_sys;
 int time_game;
 extern struct actor actorOfTheGame;
 extern int cursorX;
 extern int cursorY;
 extern int level;
 extern int score;
+extern uint8_t cursorPos[2];
+extern int plant_mode1_timer;
+extern int plant_mode2_timer;
+extern int plant_mode3_timer;
 
 //Methods
 void mainGame(void);
 void update_time(void);
+struct plant initPlant(struct plant p, int i, int j, enum PlantsType type);
 
 #endif /* GAMEBASE_H_ */
