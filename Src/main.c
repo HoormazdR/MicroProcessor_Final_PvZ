@@ -82,12 +82,6 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN 0 */
 uint16_t potanLightRand[3];
-enum State{
-	GAME,
-	MENU,
-	ENTER_NAME
-};
-enum State state = ENTER_NAME;
 /* USER CODE END 0 */
 
 /**

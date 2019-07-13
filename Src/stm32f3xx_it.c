@@ -289,6 +289,7 @@ void TIM3_IRQHandler(void)
   /* USER CODE BEGIN TIM3_IRQn 1 */
   refresh_7seg();
   keypad_handler();
+  potan_controller();
   /* USER CODE END TIM3_IRQn 1 */
 }
 
@@ -303,9 +304,7 @@ void TIM4_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM4_IRQn 1 */
   refresh_lcd();
-
-
-  potan_controller();
+  refresh_ui();
   /* USER CODE END TIM4_IRQn 1 */
 }
 

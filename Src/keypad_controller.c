@@ -88,9 +88,20 @@ void gameKeypad(uint8_t row, uint8_t col){
 	} else if (row == 2 && col == 2) {
 		ui_move_cursor_up_down(1);
 	}
-	else if (row == 1 && col == 1) {
-		actorOfTheGame.PvZPlants[0] = initPlant(actorOfTheGame.PvZPlants[0], 21, 2, Potato);
+	else if (row == 1 && col == 1 && plant_mode1_timer == 0) {
+		actorOfTheGame.PvZPlants[exist_plant] = initPlant(actorOfTheGame.PvZPlants[exist_plant], cursorPos[0], cursorPos[1], Potato);
 		exist_plant++;
+		plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
+	}
+	else if (row == 2 && col == 1 && plant_mode2_timer == 0) {
+		actorOfTheGame.PvZPlants[exist_plant] = initPlant(actorOfTheGame.PvZPlants[exist_plant], cursorPos[0], cursorPos[1], Rose);
+		exist_plant++;
+		plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
+	}
+	else if (row == 3 && col == 1 && plant_mode3_timer == 0) {
+		actorOfTheGame.PvZPlants[exist_plant] = initPlant(actorOfTheGame.PvZPlants[exist_plant], cursorPos[0], cursorPos[1], Venus);
+		exist_plant++;
+		plant_mode3_timer = CON_PLANT_VENUS_RESPAWN_TIME;
 	}
 }
 
@@ -104,20 +115,26 @@ void keypadController(uint8_t row, uint8_t col){
 	}
 }
 
+int HW_VOLOME_MIN = 2;
+int HW_VOLOME_MAX = 63;
 void potan_controller(){
 	uint16_t potan = potanLightRand[0];
-	char a[30];
-	sprintf(&a,"potan: %d", potan);
-	log(a);
-	uint8_t diff = 30;
-	if(potan - pre_potan > diff){
-		log("\nleft\n");
-		ui_move_cursor_left_right(1);
+
+	if (potan < HW_VOLOME_MIN)
+		HW_VOLOME_MIN = potan;
+	if (potan > HW_VOLOME_MAX)
+		HW_VOLOME_MAX = potan;
+
+	if (CHECK_STATE(GameState, STE_TYPE_GAME)) {
+		potan = (potan - HW_VOLOME_MIN) * (CON_LCD_W_CHANGE - 1) / (HW_VOLOME_MAX - HW_VOLOME_MIN);
+
+		if (cursorPos[0] > potan) {
+			log("\nleft\n");
+			ui_move_cursor_left_right(0);
+		} else if (cursorPos[0] < potan) {
+			log("\nright\n");
+			ui_move_cursor_left_right(1);
+		}
 	}
-	else if(pre_potan - potan > diff){
-		log("\nright\n");
-		ui_move_cursor_left_right(0);
-	}
-	pre_potan = potan;
 
 }

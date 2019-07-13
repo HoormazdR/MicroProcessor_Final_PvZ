@@ -13,7 +13,10 @@
 #define CON_LAP_TIME 20000 // ms
 #define CON_LCD_W 20
 #define CON_LCD_H 4
+#define CON_LCD_W_CHANGE (CON_LCD_W)
 #define CON_HEALTH 5
+
+
 #define CON_ZOMBIE_COUNT_INITIAL 8
 #define CON_ZOMBIE_COUNT_INCREASE_PER_LAP 2
 #define CON_ZOMBIE_MAX_SCREEN_SIZE 5
@@ -54,7 +57,7 @@
 #define CHECK_STATE(state,candidStare) ((state&0xFF)==(candidStare))
 
 enum ZombiesType {MOZTAFA, JAVADI, MAMAD, ADELAPT};
-extern enum PlantsType {Potato, Roze, Venus};
+extern enum PlantsType {Potato, Rose, Venus};
 
 //Structs
 struct minsec{
@@ -69,7 +72,7 @@ struct Point {
 
 struct zombie {
 	struct Point place;
-	uint8_t health;
+	int health;
 	uint8_t power;
 	int TimeCounter;
 	enum ZombiesType type;
@@ -80,7 +83,7 @@ struct zombie {
 struct plant {
 	struct Point place;
 	uint8_t power;
-	uint8_t health;
+	int health;
 	enum PlantsType type;
 };
 
@@ -104,6 +107,9 @@ extern int cursorY;
 extern int level;
 extern int score;
 extern uint8_t cursorPos[2];
+extern int plant_mode1_timer;
+extern int plant_mode2_timer;
+extern int plant_mode3_timer;
 
 //Methods
 void mainGame(void);
