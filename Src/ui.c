@@ -109,7 +109,7 @@ void refresh_lcd() {
 		preCursorPos[0] = cursorPos[0];
 		preCursorPos[1] = cursorPos[1];
 
-		uint8_t interval = 3;
+		uint8_t interval = 8;
 		if(cursor_blink_flg == 0){
 			behind_cursor = lcd[cursorPos[1]][cursorPos[0]];
 			putch(cursorPos[0], cursorPos[1], '_');
