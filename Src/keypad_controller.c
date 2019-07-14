@@ -64,12 +64,17 @@ void activeBounes() {
 					}
 				}
 			}
+			gameBounes[i].isActive = 0;
+			break;
 		}
 	}
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 	keypad_lastClick_tick = HAL_GetTick();
+
+	if(GPIO_PIN_NUMBER == 1)
+		activeBounes();
 
 	debunc_counter++;
 	if (debunc_counter < 5) {
@@ -92,8 +97,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 		keypad_clicked(3, col_num);
 	else if (GPIO_PIN_NUMBER == 128)
 		keypad_clicked(4, col_num);
-	else if(GPIO_PIN_NUMBER == 0)
-		activeBounes();
 }
 
 void gameKeypad(uint8_t row, uint8_t col) {
@@ -136,8 +139,7 @@ void potan_controller() {
 		HW_VOLOME_MAX = potan;
 
 	if (GameState == STE_NORMAL_GAME) {
-		potan = (potan - HW_VOLOME_MIN) * (CON_LCD_W_CHANGE - 1)
-				/ (HW_VOLOME_MAX - HW_VOLOME_MIN);
+		potan = (potan - HW_VOLOME_MIN) * (CON_LCD_W_CHANGE - 1) / (HW_VOLOME_MAX - HW_VOLOME_MIN);
 
 		if (cursorPos[0] > potan) {
 			ui_move_cursor_left_right(0);

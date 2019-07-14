@@ -11,7 +11,7 @@
 // Constants
 #define CON_TOTAL_LEVEL 8
 #define CON_LAP_TIME 20000 // ms
-#define CON_LCD_W 20
+#define CON_LCD_W 24
 #define CON_LCD_H 4
 #define CON_LCD_W_CHANGE (CON_LCD_W)
 #define CON_HEALTH 5
@@ -120,13 +120,14 @@ extern uint8_t cursorPos[2];
 extern int plant_mode1_timer;
 extern int plant_mode2_timer;
 extern int plant_mode3_timer;
-extern struct gameBounes[4];
+extern struct bounes gameBounes[4];
 
 //Methods
 void mainGame(void);
 void update_time(void);
 void saveTheGame();
 void loadGame();
+void deleteZombie(struct zombie array[], int position, int size);
 struct plant initPlant(struct plant p, int i, int j, enum PlantsType type);
 
 

@@ -30,7 +30,7 @@ int GameState_next = 0;
 extern uint16_t potanLightRand[3];
 int getReadyPlant = 0;
 struct bounes gameBounes[4];
-extern huart3;
+extern UART_HandleTypeDef huart3;
 
 int getRand() {
 	return potanLightRand[2]%100;
@@ -54,8 +54,8 @@ void looseHealth (struct zombie z[], int i) {
 		deleteZombie(z, i, 22);
 		health--;
 		last_chance_time = 0;
-		if(health <= 0)
-			changeState(STE_LOOSE, STE_ENTER_NAME);
+//		if(health <= 0)
+//			changeState(STE_LOOSE, STE_ENTER_NAME);
 	}
 }
 
@@ -122,19 +122,21 @@ void makeNewZombie() {
 }
 
 void addBounes() {
-	int x = rand() % 24;
-	int y = rand() % 4;
 	int type = rand() % 3;
+	int x,y;
 
-	if(checkLCD(x, y) == ' ') {
-		for(int i = 0; i < 4; i++) {
-			if(gameBounes[i].isActive == 0) {
-				gameBounes[i].type = type;
-				gameBounes[i].p.posx = x;
-				gameBounes[i].p.posy = y;
-				gameBounes[i].isActive = 1;
-				gameBounes[i].timerCounter = 4000;
-			}
+	do {
+		x = rand() % 23 + 1;
+		y = rand() % 4 + 1;
+	} while (checkLCD(x, y) != ' ');
+
+	for (int i = 0; i < 4; i++) {
+		if (gameBounes[i].isActive == 0) {
+			gameBounes[i].type = type;
+			gameBounes[i].p.posx = x;
+			gameBounes[i].p.posy = y;
+			gameBounes[i].isActive = 1;
+			gameBounes[i].timerCounter = 4000;
 		}
 	}
 
@@ -143,7 +145,7 @@ void addBounes() {
 void updateZomiesMove() {
 	int chance = getRand() % 10 + 1;
 
-//	if(exist_plant > 6)
+	if(exist_plant > 6)
 		getReadyPlant = 0;
 
 	if(zombie_alive < 5 && chance > 3 && !getReadyPlant) {
