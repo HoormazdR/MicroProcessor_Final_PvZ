@@ -71,6 +71,13 @@ struct Point {
 	uint8_t posy;
 };
 
+struct bounes {
+	struct Point p;
+	int type;
+	int timerCounter;
+	int isActive;
+};
+
 struct zombie {
 	struct Point place;
 	int health;
@@ -111,6 +118,7 @@ extern uint8_t cursorPos[2];
 extern int plant_mode1_timer;
 extern int plant_mode2_timer;
 extern int plant_mode3_timer;
+extern struct gameBounes[4];
 
 //Methods
 void mainGame(void);

@@ -16,6 +16,8 @@ void ui_enterName_putchar(char c);
 void ui_move_cursor_left_right(uint8_t leftOrRight);
 void cursorUpdate(void);
 void changeState(int toState, int nextState);
+char checkLCD(int x, int y);
+void showBiunes(int x, int y);
 
 // Internal Macros
 #define HEX__(n) 0x##n##LU

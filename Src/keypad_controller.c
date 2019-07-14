@@ -43,6 +43,31 @@ void keypad_handler()
 
 }
 
+void activeBounes() {
+	for(int i = 0; i < 4; i++) {
+		if(cursorPos[0] == gameBounes[i].p.posx && cursorPos[1] == gameBounes[i].p.posy && gameBounes[i].isActive == 1) {
+			if(gameBounes[i].type == 0) {
+				score += 100;
+			}
+			else if(gameBounes[i].type == 1) {
+				if(plant_mode3_timer > 0)
+					plant_mode3_timer = 0;
+				else if(plant_mode2_timer > 0)
+					plant_mode2_timer = 0;
+				else
+					plant_mode1_timer = 0;
+			}
+			else {
+				for(int i = 0; i < CON_ZOMBIE_COUNT_INITIAL + (CON_ZOMBIE_COUNT_INCREASE_PER_LAP * (level - 1)); i++) {
+					if(actorOfTheGame.PvZzombies[i].isDead == 0 && actorOfTheGame.PvZzombies[i].isInitial == 1) {
+						deleteZombie(actorOfTheGame.PvZzombies, i, 22);
+					}
+				}
+			}
+		}
+	}
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 	keypad_lastClick_tick = HAL_GetTick();
 
@@ -70,6 +95,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 		keypad_clicked(3, col_num);
 	else if(GPIO_PIN_NUMBER == 128)
 		keypad_clicked(4, col_num);
+	else if(GPIO_PIN_NUMBER == 0)
+		activeBounes();
 }
 
 
