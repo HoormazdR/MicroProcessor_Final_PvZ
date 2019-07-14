@@ -122,6 +122,8 @@ int main(void)
   MX_ADC4_Init();
   MX_USART3_UART_Init();
   MX_TIM4_Init();
+  MX_TIM1_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   LiquidCrystal(GPIOD, GPIO_PIN_8, GPIO_PIN_9, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12, GPIO_PIN_13, GPIO_PIN_14);
   begin(20,4);
@@ -135,14 +137,37 @@ int main(void)
   //TODO: REMOVE THESE TESTS
 //  changeState(STE_SAVE, STE_NORMAL_GAME);
 //  saveTheGame();
+  //PWM
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_3);
 
 
   HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
 
   //for testing the EnterName
-
+//  lightOnBoardLED(2, 1);
 //  ui_enterNameInit();
-
+//  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 200);
+//  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 200);
+//  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 200);
+//  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 200);
+//
+//
+//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 200);
+//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 200);
+//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 200);
+//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, 200);
   //----------------------
   /* USER CODE END 2 */
 
@@ -200,11 +225,14 @@ void SystemClock_Config(void)
   }
 
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB|RCC_PERIPHCLK_USART3
-                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_ADC34;
+                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_TIM1
+                              |RCC_PERIPHCLK_TIM8|RCC_PERIPHCLK_ADC34;
   PeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
   PeriphClkInit.Adc34ClockSelection = RCC_ADC34PLLCLK_DIV1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_HSI;
   PeriphClkInit.USBClockSelection = RCC_USBCLKSOURCE_PLL_DIV1_5;
+  PeriphClkInit.Tim1ClockSelection = RCC_TIM1CLK_HCLK;
+  PeriphClkInit.Tim8ClockSelection = RCC_TIM8CLK_HCLK;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);

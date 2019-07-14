@@ -166,24 +166,30 @@ void updatePlantCoolDown() {
 	if(plant_mode1_timer > 0)
 	{
 		plant_mode1_timer--;
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, 0);
+		lightOnBoardLED(9, 0);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, 1);
 	}
 	else if(plant_mode1_timer <= 0)
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, 1);
+		lightOnBoardLED(9, 1);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, 1);
 	if(plant_mode2_timer > 0)
 	{
 		plant_mode2_timer--;
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
+		lightOnBoardLED(10, 0);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
 	}
 	else if(plant_mode2_timer <= 0)
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 1);
+		lightOnBoardLED(10, 1);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 1);
 	if(plant_mode3_timer > 0)
 	{
 		plant_mode3_timer--;
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
+		lightOnBoardLED(11, 0);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
 	}
 	else if(plant_mode3_timer <= 0)
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
+		lightOnBoardLED(11, 1);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
 }
 
 void update_time() {

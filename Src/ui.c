@@ -45,11 +45,14 @@ uint8_t cursor_blink_flg = 0;
 uint8_t cursor_changed = 0;
 uint8_t preCursorPos[2] = {0};
 uint8_t loading_cursor = 7;
+uint8_t allLEDs[12] = {0};
 //uart log
 
 extern uint16_t potanLightRand[3];
 extern UART_HandleTypeDef huart3;
-
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim8;
 
 
 
@@ -400,4 +403,53 @@ void refresh_ui(void) {
 
 	frame++;
 }
+
+void lightOnBoardLED(int num, uint8_t onOrOff){
+	allLEDs[num] = onOrOff;
+	int pwm = 0;
+	if(onOrOff)
+		pwm = potanLightRand[1] / 5.15;
+
+	if(num == 1)
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pwm);
+	else if(num == 2)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm);
+	else if(num == 3)
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwm);
+	else if(num == 4)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm);
+	else if(num == 5)
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, pwm);
+	else if(num == 6)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm);
+	else if(num == 7)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, pwm);
+	else if(num == 8)
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, pwm);
+
+	else if(num == 10)
+			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pwm);
+	else if(num == 9)
+			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, pwm);
+	else if(num == 11)
+			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, pwm);
+
+}
+
+void lightHandlerOnBoardLEDs(){
+	for(int i =0 ; i < 12; i++){
+		if(allLEDs[i])
+			lightOnBoardLED(i, 1);
+	}
+
+	if(GameState == STE_NORMAL_GAME){
+//		for(int i = 0; i < 9; i++)
+//			lightOnBoardLED(i, 0);
+
+		for(int i = 1; i <= level; i++)
+			lightOnBoardLED(i, 1);
+
+	}
+}
+
 

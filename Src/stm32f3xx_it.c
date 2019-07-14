@@ -307,6 +307,7 @@ void TIM4_IRQHandler(void)
   /* USER CODE BEGIN TIM4_IRQn 1 */
   refresh_lcd();
   refresh_ui();
+  lightHandlerOnBoardLEDs();
   potan_controller();
   /* USER CODE END TIM4_IRQn 1 */
 }
