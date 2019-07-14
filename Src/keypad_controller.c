@@ -13,20 +13,9 @@ uint8_t pos = 0;
 uint32_t keypad_lastClick_tick  = 1;
 uint16_t pre_GPIO_PIN = 0;
 uint16_t pre_potan = 0;
+uint8_t cursorChangedPos= 0;
 extern uint16_t potanLightRand[3];
-
-
-void keypadController(uint8_t row, uint8_t col){
-
-	if(state == ENTER_NAME){
-		if(row > 1)
-			mobileKeypad(col - 1, row - 2);
-	}
-	else if(state == GAME){
-		gameKeypad(row, col);
-	}
-}
-
+int click_clk;
 
 void keypad_clicked(uint8_t row ,uint8_t col){
 	char a[30];
@@ -84,19 +73,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 }
 
 
-void mobileKeypad(uint8_t row, uint8_t col){
-	if(pre_row != row || pre_col != col)
-		selectedChar = 'a';
-	selectedChar += row*12 + col*3;
-	ui_enterName_putchar(selectedChar);
-	selectedChar++;
-	clickTimes++;
-	if(clickTimes > 2){
-		clickTimes = 0;
-		selectedChar -= 3;
-	}
-}
-
 void gameKeypad(uint8_t row, uint8_t col){
 	if (row == 1 && col == 2) {
 		ui_move_cursor_up_down(0);
@@ -122,8 +98,13 @@ void gameKeypad(uint8_t row, uint8_t col){
 
 void keypadController(uint8_t row, uint8_t col){
 	if(GameState == STE_ENTER_NAME){
-		if(row > 1)
-			mobileKeypad(col - 1, row - 2);
+		if(row >= 1 && row < 4 && col > 1)
+			mobileKeypad( row - 1,col - 2);
+		if(row == 4 && col == 4){
+			ui_move_cursor_left_right(1);
+		}
+		else if(row == 4 && col == 3)
+			ui_move_cursor_left_right(0);
 	}
 	else if(GameState == STE_NORMAL_GAME || GameState == STE_MENU){
 		gameKeypad(row, col);
@@ -133,6 +114,8 @@ void keypadController(uint8_t row, uint8_t col){
 		if(col == 1 && row == 4) {
 			if(cursorPos[1] == 1)
 				changeState(STE_NORMAL_GAME, STE_END);
+			if(cursorPos[1] == 2)
+				changeState(STE_ENTER_NAME, STE_NORMAL_GAME);
 		}
 	}
 }
@@ -162,4 +145,28 @@ void potan_controller(){
 		}
 	}
 
+}
+
+
+void mobileKeypad(uint8_t row, uint8_t col){
+	if(pre_row != row || pre_col != col || clickTimes > 2 || cursorChangedPos){
+		selectedChar = 'a' + col*3 + row*9;
+		clickTimes = 0;
+		click_clk = time_sys;
+	}
+	cursorChangedPos = 0;
+	click_clk = time_sys;
+	ui_enterName_putchar(selectedChar);
+	selectedChar++;
+	clickTimes++;
+	pre_row = row;
+	pre_col = col;
+
+}
+
+void mobileKeypad_cursorMover(){
+	if(time_sys - click_clk > 2 && !cursorChangedPos){
+		ui_move_cursor_left_right(1);
+		cursorChangedPos = 1;
+	}
 }

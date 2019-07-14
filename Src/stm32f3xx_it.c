@@ -273,6 +273,7 @@ void TIM2_IRQHandler(void)
   /* USER CODE BEGIN TIM2_IRQn 1 */
 //  log_adc(); //TODO: if this interval change move this function to another timer that is about 1s
   update_time();
+  mobileKeypad_cursorMover();
   HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_9);
   /* USER CODE END TIM2_IRQn 1 */
 }

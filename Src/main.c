@@ -132,7 +132,7 @@ int main(void)
 
   refresh_ui();
 
-
+  changeState(STE_ENTER_NAME, STE_NORMAL_GAME);
   HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
 
   //for testing the EnterName

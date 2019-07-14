@@ -204,6 +204,9 @@ void changeState(int toState, int nextState){
 
 	if(GameState == STE_MENU)
 		cursorPos[1] = 1;
+	if(GameState == STE_ENTER_NAME)
+		ui_enter_name_init();
+
 
 
 }
@@ -266,12 +269,20 @@ void screen_normal_game() {
  */
 
 void moveCursor(uint8_t x, uint8_t y){
+	if(GameState == STE_ENTER_NAME && (x<7||x>=11))
+		return;
+
+	if(GameState == STE_ENTER_NAME)
+		putch(cursorPos[0],3,' ');
+
 	if(x<0||y<1||x>=20||y>=4)
 			return;
+
 	cursor_changed =  1;
 	cursorPos[1] = y;
 	cursorPos[0] = x;
 }
+
 void ui_move_cursor_up_down(uint8_t upOrDown){
 	if(upOrDown){
 		moveCursor(cursorPos[0], cursorPos[1]+1);
@@ -291,15 +302,8 @@ void ui_move_cursor_left_right(uint8_t leftOrRight){
 	}
 }
 
-void ui_enterNameInit(){
-	clearLCD();
-	putstr(0,0,"Enter your name");
-	putstr(7,2,"****");
-	moveCursor(7, 2);
-}
-
 void ui_enterName_putchar(char c){
-	putch(cursorPos[1],cursorPos[0], c);
+	putch(cursorPos[0],2, c);
 }
 
 void ui_loose_screen() {
@@ -331,6 +335,15 @@ void ui_main_menu() {
 
 	putch(5, cursorPos[1], '>');
 }
+void ui_enter_name_init(){
+	clearLCD();
+	putstr(0,0,"Enter your name");
+	putstr(7,2,"****");
+	cursorPos[0] = 7;
+}
+void ui_enter_name(){
+	putch(cursorPos[0],3,'^');
+}
 
 void refresh_ui(void) {
 	int ok;
@@ -341,7 +354,7 @@ void refresh_ui(void) {
 	}
 
 	if (GameState == STE_ENTER_NAME) {
-		ui_enterNameInit();
+		ui_enter_name();
 		ok=1;
 
 	}
@@ -360,6 +373,8 @@ void refresh_ui(void) {
 		ui_main_menu();
 		ok=1;
 	}
+	if(GameState == STE_ENTER_NAME)
+		ui_enter_name();
 
 	frame++;
 }
