@@ -36,6 +36,9 @@ unsigned char plantType3[] = {
 		0x00, 0x0E, 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x0E
 };
 
+unsigned char coins[] = {
+		0x00, 0x0E, 0x1F, 0x1B, 0x1F, 0x0E, 0x00, 0x00
+};
 // current lcd frame
 uint8_t lcd[4][20];
 
@@ -100,6 +103,10 @@ void clearLCD() {
 
 void cursorUpdate() {
 	putch(cursorPos[0], cursorPos[1], '_');
+}
+
+char checkLCD(int x, int y) {
+	return lcd[x][y];
 }
 
 // this function refresh just changed parts of lcd
@@ -230,6 +237,7 @@ void screen_normal_game() {
 		 createChar(2, plantType1);
 		 createChar(3, plantType2);
 		 createChar(4, plantType3);
+		 createChar(7, coins);
 	}
 	char enemy_mostafa = 0;
 	char enemy_javadi = 1;
@@ -238,6 +246,7 @@ void screen_normal_game() {
 	char plant_Type1 = 2;
 	char plant_Type2 = 3;
 	char plant_Type3 = 4;
+	char coins = 7;
 
 	clearLCD();
 	//FIXME: in chera constante ?
@@ -261,6 +270,12 @@ void screen_normal_game() {
 		else if (actorOfTheGame.PvZPlants[i].type == Potato)
 			putch(actorOfTheGame.PvZPlants[i].place.posx, actorOfTheGame.PvZPlants[i].place.posy,  plant_Type3);
 
+	}
+
+	for(int i = 0; i < 4; i++) {
+		if(gameBounes[i].isActive == 1) {
+			putch(gameBounes[i].p.posx, gameBounes[i].p.posy, coins);
+		}
 	}
 
 	if(frame%20 >= 0 && frame%20 <= 10 )

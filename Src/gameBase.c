@@ -29,7 +29,8 @@ int GameState = STE_MENU;
 int GameState_next = 0;
 extern uint16_t potanLightRand[3];
 int getReadyPlant = 0;
-extern huart3;
+struct bounes gameBounes[4];
+extern UART_HandleTypeDef huart3;
 
 int getRand() {
 	return potanLightRand[2]%100;
@@ -53,8 +54,8 @@ void looseHealth (struct zombie z[], int i) {
 		deleteZombie(z, i, 22);
 		health--;
 		last_chance_time = 0;
-		if(health <= 0)
-			changeState(STE_LOOSE, STE_ENTER_NAME);
+//		if(health <= 0)
+//			changeState(STE_LOOSE, STE_ENTER_NAME);
 	}
 }
 
@@ -120,10 +121,31 @@ void makeNewZombie() {
 	}
 }
 
+void addBounes() {
+	int type = rand() % 3;
+	int x,y;
+
+	do {
+		x = rand() % 23 + 1;
+		y = rand() % 4 + 1;
+	} while (checkLCD(x, y) != ' ');
+
+	for (int i = 0; i < 4; i++) {
+		if (gameBounes[i].isActive == 0) {
+			gameBounes[i].type = type;
+			gameBounes[i].p.posx = x;
+			gameBounes[i].p.posy = y;
+			gameBounes[i].isActive = 1;
+			gameBounes[i].timerCounter = 4000;
+		}
+	}
+
+}
+
 void updateZomiesMove() {
 	int chance = getRand() % 10 + 1;
 
-//	if(exist_plant > 6)
+	if(exist_plant > 6)
 		getReadyPlant = 0;
 
 	if(zombie_alive < 5 && chance > 3 && !getReadyPlant) {
@@ -192,6 +214,19 @@ void updatePlantCoolDown() {
 //		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
 }
 
+void bounesCounter() {
+	for(int i=0; i < 4; i++) {
+		if(gameBounes[i].isActive == 1) {
+			gameBounes[i].timerCounter -= 1000;
+			if(gameBounes[i].timerCounter <= 0) {
+				gameBounes[i].isActive = 0;
+				gameBounes[i].p.posx = 0;
+				gameBounes[i].p.posy = 0;
+			}
+		}
+	}
+}
+
 void update_time() {
 	timer_addation();
 
@@ -199,6 +234,9 @@ void update_time() {
 		updateZomiesMove();
 		updatePlantCoolDown();
 		calculateScore();
+		bounesCounter();
+		if(rand() % 10 > 6)
+			addBounes();
 	}
 
 }

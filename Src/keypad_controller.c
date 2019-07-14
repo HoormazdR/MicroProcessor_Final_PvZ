@@ -43,8 +43,38 @@ void keypad_handler() {
 
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER) {
+void activeBounes() {
+	for(int i = 0; i < 4; i++) {
+		if(cursorPos[0] == gameBounes[i].p.posx && cursorPos[1] == gameBounes[i].p.posy && gameBounes[i].isActive == 1) {
+			if(gameBounes[i].type == 0) {
+				score += 100;
+			}
+			else if(gameBounes[i].type == 1) {
+				if(plant_mode3_timer > 0)
+					plant_mode3_timer = 0;
+				else if(plant_mode2_timer > 0)
+					plant_mode2_timer = 0;
+				else
+					plant_mode1_timer = 0;
+			}
+			else {
+				for(int i = 0; i < CON_ZOMBIE_COUNT_INITIAL + (CON_ZOMBIE_COUNT_INCREASE_PER_LAP * (level - 1)); i++) {
+					if(actorOfTheGame.PvZzombies[i].isDead == 0 && actorOfTheGame.PvZzombies[i].isInitial == 1) {
+						deleteZombie(actorOfTheGame.PvZzombies, i, 22);
+					}
+				}
+			}
+			gameBounes[i].isActive = 0;
+			break;
+		}
+	}
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 	keypad_lastClick_tick = HAL_GetTick();
+
+	if(GPIO_PIN_NUMBER == 1)
+		activeBounes();
 
 	debunc_counter++;
 	if (debunc_counter < 5) {
@@ -109,8 +139,7 @@ void potan_controller() {
 		HW_VOLOME_MAX = potan;
 
 	if (GameState == STE_NORMAL_GAME) {
-		potan = (potan - HW_VOLOME_MIN) * (CON_LCD_W_CHANGE - 1)
-				/ (HW_VOLOME_MAX - HW_VOLOME_MIN);
+		potan = (potan - HW_VOLOME_MIN) * (CON_LCD_W_CHANGE - 1) / (HW_VOLOME_MAX - HW_VOLOME_MIN);
 
 		if (cursorPos[0] > potan) {
 			ui_move_cursor_left_right(0);
