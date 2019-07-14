@@ -16,6 +16,17 @@ uint16_t pre_potan = 0;
 extern uint16_t potanLightRand[3];
 
 
+void keypadController(uint8_t row, uint8_t col){
+
+	if(state == ENTER_NAME){
+		if(row > 1)
+			mobileKeypad(col - 1, row - 2);
+	}
+	else if(state == GAME){
+		gameKeypad(row, col);
+	}
+}
+
 
 void keypad_clicked(uint8_t row ,uint8_t col){
 	char a[30];
