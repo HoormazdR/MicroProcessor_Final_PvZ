@@ -43,6 +43,8 @@
 #define STE_TYPE_GAME           0x02
 #define STE_TYPE_CONFRIM_POPUP  0x03
 
+#define STE_LOAD   		0x0C00 + STE_TYPE_CONFRIM_POPUP
+#define STE_SAVE		0x0B00 + STE_TYPE_CONFRIM_POPUP
 #define STE_ENTER_NAME     0x0800 + STE_TYPE_CONFRIM_POPUP
 #define STE_MENU			0x0900 + STE_TYPE_CONFRIM_POPUP
 #define STE_READY_TO_PLAY  0x0A00 + STE_TYPE_CONFRIM_POPUP
@@ -123,6 +125,9 @@ extern struct gameBounes[4];
 //Methods
 void mainGame(void);
 void update_time(void);
+void saveTheGame();
+void loadGame();
 struct plant initPlant(struct plant p, int i, int j, enum PlantsType type);
+
 
 #endif /* GAMEBASE_H_ */

@@ -47,7 +47,7 @@ uint8_t lcd_last[4][20];
 uint8_t cursor_blink_flg = 0;
 uint8_t cursor_changed = 0;
 uint8_t preCursorPos[2] = {0};
-
+uint8_t loading_cursor = 7;
 //uart log
 
 extern uint16_t potanLightRand[3];
@@ -211,6 +211,9 @@ void changeState(int toState, int nextState){
 
 	if(GameState == STE_MENU)
 		cursorPos[1] = 1;
+	if(GameState == STE_ENTER_NAME)
+		ui_enter_name_init();
+
 
 
 }
@@ -243,6 +246,7 @@ void screen_normal_game() {
 	char coins = 7;
 
 	clearLCD();
+	//FIXME: in chera constante ?
 	for(int i = 0; i < CON_ZOMBIE_SIZE; i++) {
 		if(actorOfTheGame.PvZzombies[i].type == 0)
 			showZombieCharactor(i, enemy_mostafa);
@@ -281,12 +285,20 @@ void screen_normal_game() {
  */
 
 void moveCursor(uint8_t x, uint8_t y){
+	if(GameState == STE_ENTER_NAME && (x<7||x>=11))
+		return;
+
+	if(GameState == STE_ENTER_NAME)
+		putch(cursorPos[0],3,' ');
+
 	if(x<0||y<1||x>=20||y>=4)
 			return;
+
 	cursor_changed =  1;
 	cursorPos[1] = y;
 	cursorPos[0] = x;
 }
+
 void ui_move_cursor_up_down(uint8_t upOrDown){
 	if(upOrDown){
 		moveCursor(cursorPos[0], cursorPos[1]+1);
@@ -306,15 +318,8 @@ void ui_move_cursor_left_right(uint8_t leftOrRight){
 	}
 }
 
-void ui_enterNameInit(){
-	clearLCD();
-	putstr(0,0,"Enter your name");
-	putstr(7,2,"****");
-	moveCursor(7, 2);
-}
-
 void ui_enterName_putchar(char c){
-	putch(cursorPos[1],cursorPos[0], c);
+	putch(cursorPos[0],2, c);
 }
 
 void ui_loose_screen() {
@@ -346,7 +351,32 @@ void ui_main_menu() {
 
 	putch(5, cursorPos[1], '>');
 }
+void ui_enter_name_init(){
+	clearLCD();
+	putstr(0,0,"Enter your name");
+	putstr(7,2,"****");
+	cursorPos[0] = 7;
+}
+void ui_enter_name(){
+	putstr(0,0,"Enter your name");
 
+	putch(cursorPos[0],3,'^');
+}
+void ui_save_screen(){
+	clearLCD();
+	putstr(6,0,"Saving");
+
+	putch(loading_cursor,1,'>');
+	if(frame%20 == 0)
+		loading_cursor++;
+
+	if(loading_cursor > 10)
+		loading_cursor = 7;
+}
+void ui_load_screen(){
+	clearLCD();
+	putstr(6,1,"Loading...");
+}
 void refresh_ui(void) {
 	int ok;
 	// normal game
@@ -356,9 +386,8 @@ void refresh_ui(void) {
 	}
 
 	if (GameState == STE_ENTER_NAME) {
-		ui_enterNameInit();
+		ui_enter_name();
 		ok=1;
-
 	}
 
 	if(GameState == STE_LOOSE) {
@@ -375,6 +404,15 @@ void refresh_ui(void) {
 		ui_main_menu();
 		ok=1;
 	}
+	if(GameState == STE_ENTER_NAME)
+		ui_enter_name();
+
+	if(GameState == STE_SAVE)
+		ui_save_screen();
+
+	if(GameState == STE_LOAD)
+		ui_load_screen();
 
 	frame++;
 }
+

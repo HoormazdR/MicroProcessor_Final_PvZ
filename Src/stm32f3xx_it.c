@@ -41,8 +41,9 @@
 #include "keypad_controller.h"
 
 
-extern UART_HandleTypeDef huart3;
-
+extern uint8_t uartRecivedData;
+uint8_t reciveBuffer[1000];
+uint8_t reciveBuffer_index = 0;
 
 
 
@@ -273,6 +274,7 @@ void TIM2_IRQHandler(void)
   /* USER CODE BEGIN TIM2_IRQn 1 */
 //  log_adc(); //TODO: if this interval change move this function to another timer that is about 1s
   update_time();
+  mobileKeypad_cursorMover();
   HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_9);
   /* USER CODE END TIM2_IRQn 1 */
 }
@@ -305,7 +307,6 @@ void TIM4_IRQHandler(void)
   /* USER CODE BEGIN TIM4_IRQn 1 */
   refresh_lcd();
   refresh_ui();
-
   potan_controller();
   /* USER CODE END TIM4_IRQn 1 */
 }
@@ -320,6 +321,18 @@ void USART3_IRQHandler(void)
   /* USER CODE END USART3_IRQn 0 */
   HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
+
+  if(GameState == STE_LOAD){
+	  reciveBuffer[reciveBuffer_index++] = uartRecivedData;
+	  reciveBuffer[reciveBuffer_index] = 0;
+
+	  if(uartRecivedData == 0xFF){
+		  reciveBuffer_index = 0;
+		  loadGame(reciveBuffer);
+	  }
+  }
+
+  HAL_UART_Receive_IT(&huart3, &uartRecivedData, 1);
 
   /* USER CODE END USART3_IRQn 1 */
 }

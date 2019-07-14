@@ -82,6 +82,7 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN 0 */
 uint16_t potanLightRand[3];
+uint8_t uartRecivedData;
 /* USER CODE END 0 */
 
 /**
@@ -129,8 +130,11 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_Base_Start_IT(&htim4);
-
+  HAL_UART_Receive_IT(&huart3, &uartRecivedData, 1);
   refresh_ui();
+  //TODO: REMOVE THESE TESTS
+//  changeState(STE_SAVE, STE_NORMAL_GAME);
+//  saveTheGame();
 
 
   HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
