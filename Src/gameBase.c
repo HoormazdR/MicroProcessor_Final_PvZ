@@ -19,6 +19,8 @@ struct actor actorOfTheGame;
 int level = 1;
 int last_chance_time = 0;
 int zombie_enter = 0;
+int saveData_index = 0;
+int load_index =0;
 int score = 0;
 int plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
 int plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
@@ -27,6 +29,7 @@ int GameState = STE_MENU;
 int GameState_next = 0;
 extern uint16_t potanLightRand[3];
 int getReadyPlant = 0;
+extern huart3;
 
 int getRand() {
 	return potanLightRand[2]%100;
@@ -120,7 +123,7 @@ void makeNewZombie() {
 void updateZomiesMove() {
 	int chance = getRand() % 10 + 1;
 
-	if(exist_plant > 6)
+//	if(exist_plant > 6)
 		getReadyPlant = 0;
 
 	if(zombie_alive < 5 && chance > 3 && !getReadyPlant) {
@@ -243,3 +246,98 @@ void initLogic() {
 
 }
 
+void saveAddData(char saveData[], char c){
+	saveData[saveData_index] = c;
+	saveData_index++;
+}
+void saveTheGame(){
+
+	char saveData[1000];
+	saveData_index = 0;
+
+	saveAddData(saveData, time_game);
+	saveAddData(saveData, health);
+	saveAddData(saveData, level);
+	saveAddData(saveData, score);
+	saveAddData(saveData, plant_mode1_timer);
+	saveAddData(saveData, plant_mode2_timer);
+	saveAddData(saveData, plant_mode3_timer);
+	saveAddData(saveData, zombie_alive);
+
+	for(int i =0 ; i < 22;i++){
+		saveAddData(saveData, actorOfTheGame.PvZzombies[i].health);
+		saveAddData(saveData, actorOfTheGame.PvZzombies[i].type);
+		saveAddData(saveData, actorOfTheGame.PvZzombies[i].place.posx);
+		saveAddData(saveData, actorOfTheGame.PvZzombies[i].place.posy);
+		saveAddData(saveData, actorOfTheGame.PvZzombies[i].isInitial);
+		saveAddData(saveData, actorOfTheGame.PvZzombies[i].isDead);
+		saveAddData(saveData, actorOfTheGame.PvZzombies[i].power);
+		saveAddData(saveData, actorOfTheGame.PvZzombies[i].TimeCounter);
+	}
+	saveAddData(saveData, exist_plant);
+	for(int i = 0; i < exist_plant; i++){
+		saveAddData(saveData, actorOfTheGame.PvZPlants[i].health);
+		saveAddData(saveData, actorOfTheGame.PvZPlants[i].type);
+		saveAddData(saveData, actorOfTheGame.PvZPlants[i].place.posx);
+		saveAddData(saveData, actorOfTheGame.PvZPlants[i].place.posy);
+		saveAddData(saveData, actorOfTheGame.PvZPlants[i].power);
+	}
+
+	saveAddData(saveData, 0xFF);
+
+	HAL_UART_Transmit(&huart3,saveData, saveData_index, 1000);
+
+	changeState(STE_NORMAL_GAME, STE_END);
+
+
+}
+
+char loadGetData(char loadData[]){
+	char retval = loadData[load_index];
+	load_index++;
+	return retval;
+}
+void loadGame(char saveData[]){
+
+	load_index = 0;
+
+
+	time_game = loadGetData(saveData);
+	health = loadGetData(saveData);
+	level = loadGetData(saveData);
+	score = loadGetData(saveData);
+	plant_mode1_timer = loadGetData(saveData);
+	plant_mode2_timer = loadGetData(saveData);
+	plant_mode3_timer = loadGetData(saveData);
+	zombie_alive  = loadGetData(saveData);
+
+	for(int i =0 ; i < 22;i++){
+		actorOfTheGame.PvZzombies[i].health = loadGetData(saveData);
+		 actorOfTheGame.PvZzombies[i].type = loadGetData(saveData);
+		 actorOfTheGame.PvZzombies[i].place.posx = loadGetData(saveData);
+		 actorOfTheGame.PvZzombies[i].place.posy = loadGetData(saveData);
+		 actorOfTheGame.PvZzombies[i].isInitial = loadGetData(saveData);
+		 actorOfTheGame.PvZzombies[i].isDead = loadGetData(saveData);
+		 actorOfTheGame.PvZzombies[i].power = loadGetData(saveData);
+		 actorOfTheGame.PvZzombies[i].TimeCounter = loadGetData(saveData);
+	}
+
+	exist_plant = loadGetData(saveData);
+	for(int i = 0; i < exist_plant; i++){
+		actorOfTheGame.PvZPlants[i].health = loadGetData(saveData);
+		actorOfTheGame.PvZPlants[i].type = loadGetData(saveData);
+		actorOfTheGame.PvZPlants[i].place.posx = loadGetData(saveData);
+		actorOfTheGame.PvZPlants[i].place.posy = loadGetData(saveData);
+		actorOfTheGame.PvZPlants[i].power = loadGetData(saveData);
+	}
+
+	changeState(STE_NORMAL_GAME, STE_END);
+}
+//void loadData_handler(){
+//	if(GameState == STE_LOAD){
+//		char saveData[100];
+//		HAL_UART_Receive(&huart3, saveData, 100, 1000);
+//		loadGame(saveData);
+//
+//	}
+//}
