@@ -272,10 +272,8 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-//  log_adc(); //TODO: if this interval change move this function to another timer that is about 1s
   update_time();
   mobileKeypad_cursorMover();
-  HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_9);
   /* USER CODE END TIM2_IRQn 1 */
 }
 
@@ -291,7 +289,6 @@ void TIM3_IRQHandler(void)
   /* USER CODE BEGIN TIM3_IRQn 1 */
   refresh_7seg();
   keypad_handler();
-
   /* USER CODE END TIM3_IRQn 1 */
 }
 
@@ -309,6 +306,8 @@ void TIM4_IRQHandler(void)
   refresh_ui();
   lightHandlerOnBoardLEDs();
   potan_controller();
+  if(GameState == STE_NORMAL_GAME)
+  	  ui_transmit();
   /* USER CODE END TIM4_IRQn 1 */
 }
 
@@ -331,6 +330,55 @@ void USART3_IRQHandler(void)
 		  reciveBuffer_index = 0;
 		  loadGame(reciveBuffer);
 	  }
+  }
+  else if(GameState == STE_NORMAL_GAME) {
+	  reciveBuffer[reciveBuffer_index++] = uartRecivedData;
+	  reciveBuffer[reciveBuffer_index] = 0;
+
+		if (uartRecivedData == 195) {
+			reciveBuffer_index = 0;
+			char stringRecive[100] = {0};
+			sprintf(stringRecive, "%s", reciveBuffer);
+			const char dem[] = ":";
+			char *token;
+
+			token = strtok(stringRecive, dem);
+			char tok[10];
+
+			if (token != NULL) {
+				sprintf(tok, "%s", token);
+				if(!strcmp(tok, "plant")) {
+					token = strtok(NULL, dem);
+					int x = *token - '0';
+					token = strtok(NULL, dem);
+					int y = *token - '0';
+					token = strtok(NULL, dem);
+					int type = *token - '0';
+					if(type == 1) {
+						actorOfTheGame.PvZPlants[exist_plant] = initPlant(
+								actorOfTheGame.PvZPlants[exist_plant], x, y,
+								Potato);
+						exist_plant++;
+						plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
+					}
+					if (type == 2) {
+						actorOfTheGame.PvZPlants[exist_plant] = initPlant(
+								actorOfTheGame.PvZPlants[exist_plant], x, y,
+								Venus);
+						exist_plant++;
+						plant_mode3_timer = CON_PLANT_VENUS_RESPAWN_TIME;
+					}
+					if (type == 3) {
+						actorOfTheGame.PvZPlants[exist_plant] = initPlant(
+								actorOfTheGame.PvZPlants[exist_plant], x, y,
+								Rose);
+						exist_plant++;
+						plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
+					}
+				}
+			}
+		}
+
   }
 
   HAL_UART_Receive_IT(&huart3, &uartRecivedData, 1);

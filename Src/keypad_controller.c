@@ -73,8 +73,12 @@ void activeBounes() {
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN_NUMBER){
 	keypad_lastClick_tick = HAL_GetTick();
 
-	if(GPIO_PIN_NUMBER == 1)
-		activeBounes();
+	if(GPIO_PIN_NUMBER == 1) {
+		if(CHECK_STATE(GameState, STE_TYPE_GAME))
+			activeBounes();
+		if(CHECK_STATE(GameState, STE_TYPE_CONFRIM_POPUP))
+			gotoNextState();
+	}
 
 	debunc_counter++;
 	if (debunc_counter < 5) {
@@ -104,26 +108,6 @@ void gameKeypad(uint8_t row, uint8_t col) {
 		ui_move_cursor_up_down(0);
 	} else if (row == 2 && col == 2) {
 		ui_move_cursor_up_down(1);
-	} else if (row == 1 && col == 1 && plant_mode1_timer == 0) {
-		actorOfTheGame.PvZPlants[exist_plant] = initPlant(
-				actorOfTheGame.PvZPlants[exist_plant], cursorPos[0],
-				cursorPos[1], Potato);
-		exist_plant++;
-		plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
-	} else if (row == 2 && col == 1 && plant_mode2_timer == 0) {
-		actorOfTheGame.PvZPlants[exist_plant] = initPlant(
-				actorOfTheGame.PvZPlants[exist_plant], cursorPos[0],
-				cursorPos[1], Rose);
-		exist_plant++;
-		plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
-	} else if (row == 3 && col == 1 && plant_mode3_timer == 0) {
-		actorOfTheGame.PvZPlants[exist_plant] = initPlant(
-				actorOfTheGame.PvZPlants[exist_plant], cursorPos[0],
-				cursorPos[1], Venus);
-		exist_plant++;
-		plant_mode3_timer = CON_PLANT_VENUS_RESPAWN_TIME;
-	} else if (row == 1 && col == 4) {
-		changeState(STE_ENTER_NAME, STE_SAVE);
 	}
 }
 
@@ -189,7 +173,6 @@ void keypadController(uint8_t row, uint8_t col) {
 			if (str_lenght >= 4) {
 				changeState(STE_SAVE, STE_NORMAL_GAME);
 				saveTheGame();
-
 			}
 		}
 	} else if (GameState == STE_NORMAL_GAME || GameState == STE_MENU) {
@@ -200,11 +183,39 @@ void keypadController(uint8_t row, uint8_t col) {
 		if (col == 1 && row == 4) {
 			if (cursorPos[1] == 1)
 				changeState(STE_NORMAL_GAME, STE_END);
-			if (cursorPos[1] == 2) {
-				changeState(STE_LOAD, STE_NORMAL_GAME);
+			else if (cursorPos[1] == 2) {
+				changeState(STE_LOAD, STE_MENU);
 				reciveBuffer_index = 0;
 				reciveBuffer[reciveBuffer_index] = 0;
 			}
+			else if (cursorPos[1] == 3)
+			{
+				changeState(STE_ABOUT, STE_MENU);
+			}
 		}
+	}
+	else if (GameState == STE_NORMAL_GAME)
+	{
+		 if (row == 1 && col == 1 && plant_mode1_timer == 0) {
+				actorOfTheGame.PvZPlants[exist_plant] = initPlant(
+						actorOfTheGame.PvZPlants[exist_plant], cursorPos[0],
+						cursorPos[1], Potato);
+				exist_plant++;
+				plant_mode1_timer = CON_PLANT_POTATO_RESPAWN_TIME;
+			} else if (row == 2 && col == 1 && plant_mode2_timer == 0) {
+				actorOfTheGame.PvZPlants[exist_plant] = initPlant(
+						actorOfTheGame.PvZPlants[exist_plant], cursorPos[0],
+						cursorPos[1], Rose);
+				exist_plant++;
+				plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
+			} else if (row == 3 && col == 1 && plant_mode3_timer == 0) {
+				actorOfTheGame.PvZPlants[exist_plant] = initPlant(
+						actorOfTheGame.PvZPlants[exist_plant], cursorPos[0],
+						cursorPos[1], Venus);
+				exist_plant++;
+				plant_mode3_timer = CON_PLANT_VENUS_RESPAWN_TIME;
+			} else if (row == 1 && col == 4) {
+				changeState(STE_ENTER_NAME, STE_SAVE);
+			}
 	}
 }
