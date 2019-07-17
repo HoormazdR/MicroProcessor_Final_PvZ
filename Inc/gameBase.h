@@ -11,7 +11,7 @@
 // Constants
 #define CON_TOTAL_LEVEL 8
 #define CON_LAP_TIME 20000 // ms
-#define CON_LCD_W 24
+#define CON_LCD_W 20
 #define CON_LCD_H 4
 #define CON_LCD_W_CHANGE (CON_LCD_W)
 #define CON_HEALTH 5
@@ -28,7 +28,7 @@
 #define CON_ZOMBIE_MAMAD_POWER 3
 #define CON_ZOMBIE_ADELAPT_POWER 4
 #define CON_ZOMBIE_BASE_HEALTH 5
-#define CON_ZOMBIE_SIZE 10
+#define CON_ZOMBIE_SIZE 22
 #define CON_PLANT_POTATO_RESPAWN_TIME 4
 #define CON_PLANT_ROZ_RESPAWN_TIME 8
 #define CON_PLANT_VENUS_RESPAWN_TIME 10
@@ -55,6 +55,7 @@
 #define STE_END            0x0500 + STE_TYPE_POPUP
 #define STE_LEVEL_UP       0x0600 + STE_TYPE_POPUP
 #define STE_NORMAL_GAME    0x0700 + STE_TYPE_GAME
+#define STE_ABOUT		   0x1000 + STE_TYPE_CONFRIM_POPUP
 
 //function define
 #define CHECK_STATE(state,candidStare) ((state&0xFF)==(candidStare))
@@ -129,6 +130,7 @@ void saveTheGame();
 void loadGame();
 void deleteZombie(struct zombie array[], int position, int size);
 struct plant initPlant(struct plant p, int i, int j, enum PlantsType type);
+int getRand();
 
 
 #endif /* GAMEBASE_H_ */

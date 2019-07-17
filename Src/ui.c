@@ -39,6 +39,15 @@ unsigned char plantType3[] = {
 unsigned char coins[] = {
 		0x00, 0x0E, 0x1F, 0x1B, 0x1F, 0x0E, 0x00, 0x00
 };
+
+unsigned char midstone[] = {
+	  0x00, 0x00, 0x00, 0x00, 0x1F, 0x1F, 0x1F, 0x00
+};
+
+unsigned char midstoneUpper[] = {
+	 0x00, 0x1F, 0x1F, 0x1F, 0x00, 0x00, 0x00, 0x00
+};
+
 // current lcd frame
 uint8_t lcd[4][20];
 
@@ -92,11 +101,34 @@ void putstr(int x, int y, const char str[]) {
 		x++;
   }
 }
+
+void putstrsize(int x, int y, const char str[]) {
+  if (str == NULL) return;
+
+  const uint8_t *buffer = (const uint8_t *)str;
+  size_t size = strlen(str);
+
+	while (size--) {
+		if (x >= 20)
+			lcd[y][x % 20] = *buffer++;
+		else
+			lcd[y][x] = *buffer++;
+		x++;
+	}
+}
+
 void clearLCD_Rect(int sx, int sy, int w, int h) {
   for (int y=sy;y<h;y++)
     for (int x=sx;x<w;x++)
 			lcd[y][x]=' ';
 }
+
+void LCD_Rect(int sx, int sy, int w, int h,char c) {
+  for (int y=sy;y<h;y++)
+    for (int x=sx;x<w;x++)
+			lcd[y][x]=c;
+}
+
 void clearLCD() {
 	clearLCD_Rect(0,0,20,4);
 }
@@ -122,6 +154,10 @@ void refresh_lcd() {
 						setCursor(cux,y);
 					}
 					write(lcd[y][x]);
+					if(GameState == STE_NORMAL_GAME)
+					{
+						ui_transmit(x, y, lcd[y][x]);
+					}
 					cux++;
 				}
 		}
@@ -157,27 +193,29 @@ void show_7seg_oni(int i, int a) {
 int digit_7seg=0;
 void refresh_7seg() {
 
-	// game time to current ragham
-	int t = time_game;
-	int ragham;
-	if(digit_7seg==3)
-		ragham=health;
-	if(digit_7seg==2)
-		ragham=t/100%10;
-	if(digit_7seg==1)
-		ragham=t/10%10;
-	if(digit_7seg==0)
-		ragham=t%10;
+	if(CHECK_STATE(GameState, STE_TYPE_GAME)) {
+		// game time to current ragham
+		int t = time_game;
+		int ragham;
+		if(digit_7seg==3)
+			ragham=health;
+		if(digit_7seg==2)
+			ragham=t/100%10;
+		if(digit_7seg==1)
+			ragham=t/10%10;
+		if(digit_7seg==0)
+			ragham=t%10;
 
-	HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 1);
-	if(digit_7seg==3)
-		HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 0);
+		HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 1);
+		if(digit_7seg==3)
+			HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 0);
 
-	// normal show 7seg
-	show_7seg_oni(digit_7seg, ragham);
+		// normal show 7seg
+		show_7seg_oni(digit_7seg, ragham);
 
-	digit_7seg++;
-	digit_7seg=digit_7seg%4;
+		digit_7seg++;
+		digit_7seg=digit_7seg%4;
+	}
 
 }
 
@@ -200,10 +238,20 @@ void lcd_inital() {
 long frame = 0;
 long frame_starttime=0;
 
+void gotoNextState() {
+
+	GameState = GameState_next;
+
+}
+
 void changeState(int toState, int nextState){
 
 	if(GameState == STE_MENU && toState == STE_NORMAL_GAME)
+	{
 			initLogic();
+			for(int i = 0; i < 9; i++)
+				lightOnBoardLED(i, 0);
+	}
 	// change ui
 	GameState=toState;
 	GameState_next = nextState;
@@ -216,8 +264,6 @@ void changeState(int toState, int nextState){
 		cursorPos[1] = 1;
 	if(GameState == STE_ENTER_NAME)
 		ui_enter_name_init();
-
-
 
 }
 
@@ -259,7 +305,6 @@ void screen_normal_game() {
 			showZombieCharactor(i, enemy_mamad);
 		else if (actorOfTheGame.PvZzombies[i].type == 3)
 			showZombieCharactor(i, enemy_adelapt);
-
 	}
 
 	for(int i = 0; i < exist_plant; i++) {
@@ -273,9 +318,10 @@ void screen_normal_game() {
 	}
 
 	for(int i = 0; i < 4; i++) {
-		if(gameBounes[i].isActive == 1) {
+		if(gameBounes[i].isActive == 1)
 			putch(gameBounes[i].p.posx, gameBounes[i].p.posy, coins);
-		}
+		else if(gameBounes[i].isActive == 0)
+			putch(gameBounes[i].p.posx, gameBounes[i].p.posy, ' ');
 	}
 
 	if(frame%20 >= 0 && frame%20 <= 10 )
@@ -333,7 +379,7 @@ void ui_loose_screen() {
 	putstr(3, 2, a);
 }
 
-void ui_win_screen() {
+void ui_level_screen() {
 	char a[10];
 	sprintf(a, "Up %d", level);
 	clearLCD();
@@ -346,13 +392,64 @@ void ui_win_screen() {
 		changeState(STE_NORMAL_GAME, STE_END);
 }
 
+int digit = 0;
+int placeOfTitle = 0;
 void ui_main_menu() {
 	clearLCD();
+	putstrsize(placeOfTitle,0, "Plant Vs Zombies");
 	putstr(6, 1,"New Game");
 	putstr(6, 2,"Load Game");
 	putstr(6, 3,"About");
 
 	putch(5, cursorPos[1], '>');
+
+	int pwm = 200;
+
+	if(frame % 10 == 0){
+		HAL_GPIO_WritePin(SSEG_dot_GPIO_Port, SSEG_dot_Pin, 1);
+		show_7seg_oni(digit, 8);
+		digit = digit + 1;
+		digit = digit % 4;
+	}
+
+	if(frame % 10 == 0)
+	{
+		placeOfTitle++;
+		placeOfTitle = placeOfTitle % 24;
+	}
+
+
+	if(frame % 20 >= 0 && frame % 20 <= 10) {
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pwm);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwm);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, pwm);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, pwm);
+
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, pwm);
+
+		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pwm);
+		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, pwm);
+		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, pwm);
+	}
+	else {
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 0);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, 0);
+
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 0);
+
+		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
+		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, 0);
+		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, 0);
+	}
+
 }
 void ui_enter_name_init(){
 	clearLCD();
@@ -380,33 +477,125 @@ void ui_load_screen(){
 	clearLCD();
 	putstr(6,1,"Loading...");
 }
+
+void ui_screen_end () {
+	clearLCD();
+	putstr(5,1, "THE END!");
+}
+
+void ui_screen_about() {
+	createChar(0, plantType1);
+	char gol = 0;
+
+	clearLCD();
+	putstr(0,0, "Creators :");
+	putstr(2, 1, "Hoormazd :|");
+	putstr(10, 2, "Amin");
+	putch(15, 2, gol);
+	putch(16, 2, gol);
+	putch(17, 2, gol);
+	putch(18, 2, gol);
+}
+
+void ui_screen_ready_play () {
+	clearLCD();
+	if(frame == 0){
+		createChar(8, midstone);
+		createChar(9, midstoneUpper);
+	}
+
+
+	if(frame <= 30)
+		LCD_Rect(0,0,20,4,0xFF);
+	else if(frame <= 50) {
+		LCD_Rect(0,0,8,4,0xFF);
+		LCD_Rect(12,0,20,4,0xFF);
+	}
+	else if(frame <= 80) {
+		LCD_Rect(0,0,6,4,0xFF);
+		LCD_Rect(14,0,20,4,0xFF);
+	}else if(frame <= 100) {
+		LCD_Rect(0,0,4,4,0xFF);
+		LCD_Rect(16,0,20,4,0xFF);
+	}
+	else if(frame <= 120) {
+		LCD_Rect(0,0,2,4,0xFF);
+		LCD_Rect(18,0,20,4,0xFF);
+	}
+	else if(frame <= 140) {
+		char stone = 8;
+		char stoneUpper = 9;
+
+		LCD_Rect(8,0,12,1,0xFF);
+
+		LCD_Rect(8,1,11,2,stone);
+		LCD_Rect(8,2,11,3,stoneUpper);
+
+		LCD_Rect(8,3,12,4,0xFF);
+
+		putch(11, 1, 0xFF);
+		putch(11, 2, 0xFF);
+	}
+	else if(frame <= 160) {
+		char stone = 0;
+		char stoneUpper = 1;
+
+		LCD_Rect(8,0,12,1,0xFF);
+		putch(12, 0, stone);
+
+		putch(12, 1, 0xFF);
+
+		LCD_Rect(8,1,11,2,stone);
+		LCD_Rect(9,2,12,3,stoneUpper);
+
+		putch(8, 2, 0xFF);
+
+		LCD_Rect(9,3,13,4,0xFF);
+
+		putch(8,3,stoneUpper);
+
+	}
+	else if(frame <= 180) {
+		LCD_Rect(9,0,10,4,0xFF);
+		LCD_Rect(8,3,11,4,0xFF);
+	}
+
+	if ( frame >= 200)
+		changeState(STE_NORMAL_GAME, STE_END);
+}
+
+void ui_transmit (int x,int y,uint8_t c) {
+	char string[10];
+	sprintf(string,"%d,%d,%d\n", x,y,c);
+	log(string);
+}
+
+void ui_screen_win() {
+	clearLCD();
+	char a[10];
+	sprintf(a, "You Score : %d", score);
+	putstr(5, 1, "You Won !");
+	putstr(3, 2, a);
+}
+
 void refresh_ui(void) {
-	int ok;
 	// normal game
 	if (GameState == STE_NORMAL_GAME) {
 		screen_normal_game();
-		ok=1;
 	}
 
-	if (GameState == STE_ENTER_NAME) {
+	if (GameState == STE_ENTER_NAME)
 		ui_enter_name();
-		ok=1;
-	}
 
-	if(GameState == STE_LOOSE) {
+	if(GameState == STE_LOOSE)
 		ui_loose_screen();
-		ok=1;
-	}
 
-	if(GameState == STE_WIN) {
-		ui_win_screen();
-		ok=1;
-	}
+	if(GameState == STE_LEVEL_UP)
+		ui_level_screen();
 
-	if(GameState == STE_MENU) {
+	if(GameState == STE_MENU)
 		ui_main_menu();
-		ok=1;
-	}
+
 	if(GameState == STE_ENTER_NAME)
 		ui_enter_name();
 
@@ -415,6 +604,18 @@ void refresh_ui(void) {
 
 	if(GameState == STE_LOAD)
 		ui_load_screen();
+
+	if(GameState == STE_END)
+		ui_screen_end();
+
+	if(GameState == STE_ABOUT)
+		ui_screen_about();
+
+	if(GameState == STE_READY_TO_PLAY)
+		ui_screen_ready_play();
+
+	if(GameState == STE_WIN)
+		ui_screen_win();
 
 	frame++;
 }
@@ -451,20 +652,20 @@ void lightOnBoardLED(int num, uint8_t onOrOff){
 
 }
 
+int LED = 0;
 void lightHandlerOnBoardLEDs(){
 	for(int i =0 ; i < 12; i++){
 		if(allLEDs[i])
 			lightOnBoardLED(i, 1);
 	}
 
-	if(GameState == STE_NORMAL_GAME){
-//		for(int i = 0; i < 9; i++)
-//			lightOnBoardLED(i, 0);
+	if (GameState == STE_NORMAL_GAME) {
 
-		for(int i = 1; i <= level; i++)
+		for (int i = 1; i <= level; i++)
 			lightOnBoardLED(i, 1);
 
 	}
+
 }
 
 

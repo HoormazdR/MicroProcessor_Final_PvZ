@@ -21,6 +21,7 @@ void lightDipLED(int num, uint8_t onOrOff);
 void lightHandlerOnBoardLEDs();
 char checkLCD(int x, int y);
 void showBiunes(int x, int y);
+void gotoNextState();
 
 // Internal Macros
 #define HEX__(n) 0x##n##LU

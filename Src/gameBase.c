@@ -54,8 +54,8 @@ void looseHealth (struct zombie z[], int i) {
 		deleteZombie(z, i, 22);
 		health--;
 		last_chance_time = 0;
-//		if(health <= 0)
-//			changeState(STE_LOOSE, STE_ENTER_NAME);
+		if(health <= 0)
+			changeState(STE_LOOSE, STE_ENTER_NAME);
 	}
 }
 
@@ -102,7 +102,7 @@ void addZombie() {
 	for(int i = 0; i < CON_ZOMBIE_COUNT_INITIAL + (CON_ZOMBIE_COUNT_INCREASE_PER_LAP * (level - 1)); i++) {
 		if(actorOfTheGame.PvZzombies[i].isInitial == 0)
 		{
-			actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], getRand() % 24, getRand() % 4);
+			actorOfTheGame.PvZzombies[i] = initZombie(actorOfTheGame.PvZzombies[i], getRand() % 19 + 1, getRand() % 4);
 			zombie_alive++;
 			return;
 		}
@@ -124,11 +124,13 @@ void makeNewZombie() {
 void addBounes() {
 	int type = rand() % 3;
 	int x,y;
+	x = rand() % 19 + 1;
+	y = rand() % 4 + 1;
 
-	do {
-		x = rand() % 23 + 1;
+	while (checkLCD(x, y) != ' ') {
+		x = rand() % 19 + 1;
 		y = rand() % 4 + 1;
-	} while (checkLCD(x, y) != ' ');
+	}
 
 	for (int i = 0; i < 4; i++) {
 		if (gameBounes[i].isActive == 0) {
@@ -142,13 +144,15 @@ void addBounes() {
 
 }
 
+int flag = 1;
 void updateZomiesMove() {
 	int chance = getRand() % 10 + 1;
 
-	if(exist_plant > 6)
+	if(exist_plant > 6) {
 		getReadyPlant = 0;
+	}
 
-	if(zombie_alive < 5 && chance > 3 && !getReadyPlant) {
+	if(zombie_alive < 5 && chance > 3 && !getReadyPlant && GameState == STE_NORMAL_GAME) {
 		addZombie();
 	}
 
@@ -167,7 +171,7 @@ void updateZomiesMove() {
 	if(time_game%20 == 0 && time_game > 0) {
 		level++;
 		makeNewZombie();
-		changeState(STE_WIN, STE_ENTER_NAME);
+		changeState(STE_LEVEL_UP, STE_NORMAL_GAME);
 	}
 
 }
@@ -189,29 +193,23 @@ void updatePlantCoolDown() {
 	{
 		plant_mode1_timer--;
 		lightOnBoardLED(9, 0);
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, 1);
 	}
 	else if(plant_mode1_timer <= 0)
 		lightOnBoardLED(9, 1);
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, 1);
 	if(plant_mode2_timer > 0)
 	{
 		plant_mode2_timer--;
 		lightOnBoardLED(10, 0);
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
 	}
 	else if(plant_mode2_timer <= 0)
 		lightOnBoardLED(10, 1);
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 1);
 	if(plant_mode3_timer > 0)
 	{
 		plant_mode3_timer--;
 		lightOnBoardLED(11, 0);
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
 	}
 	else if(plant_mode3_timer <= 0)
 		lightOnBoardLED(11, 1);
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
 }
 
 void bounesCounter() {
@@ -227,10 +225,17 @@ void bounesCounter() {
 	}
 }
 
+void checkWin () {
+	if (level > 7) {
+		changeState(STE_WIN, STE_MENU);
+	}
+}
+
 void update_time() {
 	timer_addation();
 
 	if(GameState == STE_NORMAL_GAME) {
+		checkWin();
 		updateZomiesMove();
 		updatePlantCoolDown();
 		calculateScore();
@@ -282,11 +287,7 @@ void initLogic() {
 	last_chance_time = 0;
 	zombie_enter = 0;
 	getReadyPlant = 1;
-//	for(int i = 0;i< 23;i++)
-//	{
-//		actorOfTheGame.PvZPlants[i] = initPlant(actorOfTheGame.PvZPlants[i], i, 3, Venus);
-//		exist_plant++;
-//	}
+	flag = 1;
 
 }
 
@@ -377,11 +378,3 @@ void loadGame(char saveData[]){
 
 	changeState(STE_NORMAL_GAME, STE_END);
 }
-//void loadData_handler(){
-//	if(GameState == STE_LOAD){
-//		char saveData[100];
-//		HAL_UART_Receive(&huart3, saveData, 100, 1000);
-//		loadGame(saveData);
-//
-//	}
-//}
