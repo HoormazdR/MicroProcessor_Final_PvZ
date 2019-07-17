@@ -189,7 +189,6 @@ void keypadController(uint8_t row, uint8_t col) {
 		if (col == 1 && row == 4) {
 			if (cursorPos[1] == 1) {
 				changeState(STE_NORMAL_GAME, STE_END);
-				HAL_UART_Receive_IT(&huart3, &uartRecivedData, 1);
 			}
 			else if (cursorPos[1] == 2) {
 				changeState(STE_LOAD, STE_MENU);

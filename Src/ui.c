@@ -63,6 +63,9 @@ void putch(int x, int y, char t) {
 	if (x < 0 || y < 0 || x >= 20 || y >= 4)
 		return;
 	lcd[y][x] = t;
+	if (GameState == STE_NORMAL_GAME) {
+		ui_transmit(x, y, lcd[y][x]);
+	}
 }
 void putchp(int x, int y, char* t) {
 	putch(x, y, t[0]);
@@ -133,9 +136,7 @@ void refresh_lcd() {
 					setCursor(cux, y);
 				}
 				write(lcd[y][x]);
-				if (GameState == STE_NORMAL_GAME) {
-					ui_transmit(x, y, lcd[y][x]);
-				}
+
 				cux++;
 			}
 		}
@@ -224,6 +225,9 @@ void changeState(int toState, int nextState) {
 
 	if (GameState == STE_MENU && toState == STE_NORMAL_GAME) {
 		initLogic();
+	}
+
+	if (GameState == STE_NORMAL_GAME) {
 		for (int i = 0; i < 9; i++)
 			lightOnBoardLED(i, 0);
 	}
@@ -347,42 +351,8 @@ void ui_move_cursor_left_right(uint8_t leftOrRight) {
 	}
 }
 
-void ui_enterName_putchar(char c) {
-	putch(cursorPos[0], 2, c);
-}
-
-void ui_loose_screen() {
-	clearLCD();
-	char a[10];
-	sprintf(a, "You Score : %d", score);
-	putstr(5, 1, "Game Over !");
-	putstr(3, 2, a);
-}
-
-void ui_level_screen() {
-	char a[10];
-	sprintf(a, "Up %d", level);
-	clearLCD();
-	if (frame % 2 == 0)
-		putstr(6, 1, "Level");
-	else if (frame % 2 == 1)
-		putstr(12, 1, a);
-
-	if (frame > 25)
-		changeState(STE_NORMAL_GAME, STE_END);
-}
-
 int digit = 0;
-int placeOfTitle = 0;
-void ui_main_menu() {
-	clearLCD();
-	putstrsize(placeOfTitle, 0, "Plant Vs Zombies");
-	putstr(6, 1, "New Game");
-	putstr(6, 2, "Load Game");
-	putstr(6, 3, "About");
-
-	putch(5, cursorPos[1], '>');
-
+void blink_mod() {
 	int pwm = 200;
 
 	if (frame % 10 == 0) {
@@ -390,11 +360,6 @@ void ui_main_menu() {
 		show_7seg_oni(digit, 8);
 		digit = digit + 1;
 		digit = digit % 4;
-	}
-
-	if (frame % 10 == 0) {
-		placeOfTitle++;
-		placeOfTitle = placeOfTitle % 24;
 	}
 
 	if (frame % 20 >= 0 && frame % 20 <= 10) {
@@ -426,6 +391,61 @@ void ui_main_menu() {
 		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, 0);
 		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, 0);
 	}
+}
+
+void ui_enterName_putchar(char c) {
+	putch(cursorPos[0], 2, c);
+}
+
+void ui_loose_screen() {
+	clearLCD();
+	char a[10];
+	sprintf(a, "You Score : %d", score);
+	putstr(5, 1, "Game Over !");
+	putstr(3, 2, a);
+
+	blink_mod();
+}
+
+void ui_level_screen() {
+	if (level < 8) {
+		char a[10];
+		sprintf(a, "Up %d", level);
+		clearLCD();
+		if (frame % 2 == 0)
+			putstr(5, 1, "Level");
+		else if (frame % 2 == 1)
+			putstr(11, 1, a);
+
+		if (frame > 25)
+			changeState(STE_NORMAL_GAME, STE_END);
+	} else {
+		clearLCD();
+		char a[10];
+		sprintf(a, "You Score : %d", score);
+		putstr(5, 1, "You Won !");
+		putstr(3, 2, a);
+	}
+
+	blink_mod();
+}
+
+int placeOfTitle = 0;
+void ui_main_menu() {
+	clearLCD();
+	putstrsize(placeOfTitle, 0, "Plant Vs Zombies");
+	putstr(6, 1, "New Game");
+	putstr(6, 2, "Load Game");
+	putstr(6, 3, "About");
+
+	putch(5, cursorPos[1], '>');
+
+	if (frame % 10 == 0) {
+		placeOfTitle++;
+		placeOfTitle = placeOfTitle % 24;
+	}
+
+	blink_mod();
 
 }
 void ui_enter_name_init() {
@@ -547,6 +567,8 @@ void ui_screen_win() {
 	sprintf(a, "You Score : %d", score);
 	putstr(5, 1, "You Won !");
 	putstr(3, 2, a);
+
+	blink_mod();
 }
 
 void refresh_ui(void) {
@@ -613,7 +635,6 @@ void lightOnBoardLED(int num, uint8_t onOrOff) {
 		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, pwm);
 	else if (num == 8)
 		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, pwm);
-
 	else if (num == 10)
 		__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pwm);
 	else if (num == 9)
@@ -625,16 +646,22 @@ void lightOnBoardLED(int num, uint8_t onOrOff) {
 
 int LED = 0;
 void lightHandlerOnBoardLEDs() {
-	for (int i = 0; i < 12; i++) {
-		if (allLEDs[i])
-			lightOnBoardLED(i, 1);
-	}
 
 	if (GameState == STE_NORMAL_GAME) {
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, level >= 1 ? 200 : 0);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, level >= 2 ? 200 : 0);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, level >= 3 ? 200 : 0);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, level >= 4 ? 200 : 0);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, level >= 5 ? 200 : 0);
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, level >= 6 ? 200 : 0);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, level >= 7 ? 200 : 0);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, level >= 8 ? 200 : 0);
 
-		for (int i = 1; i <= level; i++)
-			lightOnBoardLED(i, 1);
-
+	} else {
+		for (int i = 0; i < 12; i++) {
+			if (allLEDs[i])
+				lightOnBoardLED(i, 1);
+		}
 	}
 
 }

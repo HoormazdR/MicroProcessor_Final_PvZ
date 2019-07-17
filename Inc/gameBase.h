@@ -100,7 +100,7 @@ struct plant {
 
 struct actor {
 	struct zombie PvZzombies[22];
-	struct plant PvZPlants[50];
+	struct plant PvZPlants[60];
 };
 
 

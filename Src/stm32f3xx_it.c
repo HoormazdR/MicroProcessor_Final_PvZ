@@ -253,6 +253,9 @@ void TIM2_IRQHandler(void) {
 	/* USER CODE BEGIN TIM2_IRQn 1 */
 	update_time();
 	mobileKeypad_cursorMover();
+	HAL_UART_Receive_IT(&huart3, &uartRecivedData, 1);
+	reciveBuffer_index = 0;
+
 	/* USER CODE END TIM2_IRQn 1 */
 }
 
@@ -318,16 +321,20 @@ void USART3_IRQHandler(void) {
 
 			token = strtok(stringRecive, dem);
 			char tok[10];
+			char a[3];
 
 			if (token != NULL) {
 				sprintf(tok, "%s", token);
 				if (!strcmp(tok, "plant")) {
 					token = strtok(NULL, dem);
-					int x = *token - '0';
+					sprintf(a, "%s" , token);
+					int x = atoi(a);
 					token = strtok(NULL, dem);
-					int y = *token - '0';
+					sprintf(a, "%s" , token);
+					int y = atoi(a);
 					token = strtok(NULL, dem);
-					int type = *token - '0';
+					sprintf(a, "%s" , token);
+					int type = atoi(a);
 					if (type == 1) {
 						actorOfTheGame.PvZPlants[exist_plant] = initPlant(
 								actorOfTheGame.PvZPlants[exist_plant], y, x,
