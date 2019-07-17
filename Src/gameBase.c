@@ -149,6 +149,11 @@ void updateZomiesMove() {
 	int chance = getRand() % 10 + 1;
 
 	if(exist_plant > 6) {
+		if(flag)
+		{
+			changeState(STE_READY_TO_PLAY, STE_NORMAL_GAME);
+			flag = 0;
+		}
 		getReadyPlant = 0;
 	}
 
