@@ -54,8 +54,10 @@ void looseHealth (struct zombie z[], int i) {
 		deleteZombie(z, i, 22);
 		health--;
 		last_chance_time = 0;
-		if(health <= 0)
+		if(health <= 0){
 			changeState(STE_LOOSE, STE_ENTER_NAME);
+			log("lost");
+		}
 	}
 }
 

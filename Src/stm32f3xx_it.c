@@ -304,12 +304,12 @@ void USART3_IRQHandler(void) {
 			reciveBuffer_index = 0;
 			loadGame(reciveBuffer);
 		}
-	} else if (GameState == STE_NORMAL_GAME) {
-		reciveBuffer[reciveBuffer_index] = uartRecivedData;
-		reciveBuffer_index++;
-
-
-		if (uartRecivedData == '\n') {
+	} else if (GameState == STE_NORMAL_GAME || GameState == STE_MENU) {
+		if (uartRecivedData != '\n') {
+			reciveBuffer[reciveBuffer_index] = uartRecivedData;
+			reciveBuffer_index++;
+			reciveBuffer[reciveBuffer_index] = 0;
+		} else {
 			reciveBuffer_index = 0;
 			char stringRecive[100] = { 0 };
 			sprintf(stringRecive, "%s", reciveBuffer);
@@ -349,6 +349,10 @@ void USART3_IRQHandler(void) {
 						exist_plant++;
 						plant_mode2_timer = CON_PLANT_ROZ_RESPAWN_TIME;
 					}
+				}
+				else if(!strcmp(tok, "start")) {
+					changeState(STE_NORMAL_GAME, STE_END);
+//					GameState = STE_NORMAL_GAME;
 				}
 			}
 		}

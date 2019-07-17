@@ -147,28 +147,11 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_Base_Start_IT(&htim4);
-  //TODO: REMOVE THESE TESTS
-//  changeState(STE_SAVE, STE_NORMAL_GAME);
-//  saveTheGame();
-  //PWM
-
+  HAL_UART_Receive_IT(&huart3, &uartRecivedData, 1);
 
 
   HAL_ADC_Start_DMA(&hadc4, potanLightRand, 3);
 
-  //for testing the EnterName
-//  lightOnBoardLED(2, 1);
-//  ui_enterNameInit();
-//  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 200);
-//  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 200);
-//  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 200);
-//  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 200);
-//
-//
-//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 200);
-//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 200);
-//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 200);
-//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, 200);
   //----------------------
   /* USER CODE END 2 */
 
